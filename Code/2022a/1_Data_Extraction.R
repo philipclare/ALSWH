@@ -1,8 +1,9 @@
 ######################################################################################
 ##   
 ## Effects of physical activity on health-related quality of life
-## Extract Key Variables From Separate Wave Datasets
-## Date: 2 September 2022
+## Extract key variables from separate wave datasets
+## Date: 16 September 2022
+## OSF Registration: https://osf.io/6zkcw
 ##
 ######################################################################################
 # 1. Setup Environment
@@ -73,6 +74,13 @@ w2data <- w2data %>%
   rename_all(~stringr::str_replace(.,"^m2",""))
 w2data <- w2data %>% 
   rename(seifadis = i_disad)
+
+w2data$b_cancer_ever <- ifelse(w2data$q20k>=1 | w2data$q20k>=1 | w2data$q20k>=1 | w2data$q20k>=1 | w2data$q20o>=1,
+                            1,0)
+w2data$b_depression_ever <- ifelse(w2data$q20p>=1,
+                               1,0)
+w2data$b_anxiety_ever <- ifelse(w2data$q20q>=1,
+                               1,0)
 
 w2data$q54sc <- ifelse(is.na(w2data$q54sc),0,w2data$q54sc)
 w2data$employ <- ifelse(((w2data$q54mn<1 | w2data$q54mn>3) & (w2data$q54sc<1 | w2data$q54sc>3)),
