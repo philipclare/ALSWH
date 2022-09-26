@@ -2,13 +2,14 @@
 ##   
 ## Effects of physical activity on health-related quality of life
 ## Merge data into combined, long-form data, ready for imputation
-## Date: 2 September 2022
+## Date: 16 September 2022
+## OSF Registration: https://osf.io/6zkcw
 ##
 ######################################################################################
 # 1. Setup Environment
 #-------------------------------------------------------------------------------------
 
-workdir <- "Y:/PRJ-prc_alswh/"
+workdir <- "Y:/PRJ-prc_alswh/Physical activity trajectories/"
 
 libs <- c("haven","plyr","dplyr")
 missing <- !libs %in% installed.packages()
@@ -17,19 +18,19 @@ if (any(missing)) {
 }
 lapply(libs, library, character.only = TRUE)
 
-##############################################################################
+######################################################################################
 # 2. Load individual wave data and merge into long form
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
-load(file=paste0(workdir,"Physical activity trajectories/Data/w1 pa.RData"))
-load(file=paste0(workdir,"Physical activity trajectories/Data/w2 pa.RData"))
-load(file=paste0(workdir,"Physical activity trajectories/Data/w3 pa.RData"))
-load(file=paste0(workdir,"Physical activity trajectories/Data/w4 pa.RData"))
-load(file=paste0(workdir,"Physical activity trajectories/Data/w5 pa.RData"))
-load(file=paste0(workdir,"Physical activity trajectories/Data/w6 pa.RData"))
-load(file=paste0(workdir,"Physical activity trajectories/Data/w7 pa.RData"))
-load(file=paste0(workdir,"Physical activity trajectories/Data/w8 pa.RData"))
-load(file=paste0(workdir,"Physical activity trajectories/Data/w9 pa.RData"))
+load(file=paste0(workdir,"Data/w1 pa.RData"))
+load(file=paste0(workdir,"Data/w2 pa.RData"))
+load(file=paste0(workdir,"Data/w3 pa.RData"))
+load(file=paste0(workdir,"Data/w4 pa.RData"))
+load(file=paste0(workdir,"Data/w5 pa.RData"))
+load(file=paste0(workdir,"Data/w6 pa.RData"))
+load(file=paste0(workdir,"Data/w7 pa.RData"))
+load(file=paste0(workdir,"Data/w8 pa.RData"))
+load(file=paste0(workdir,"Data/w9 pa.RData"))
 
 long_data <- rbind.fill(w2data,w3data,w4data,w5data,w6data,w7data,w8data,w9data)
 
@@ -37,9 +38,9 @@ long_data <- merge(long_data,w1data,by="idproj")
 
 rm(w1data,w2data,w3data,w4data,w5data,w6data,w7data,w8data,w9data)
 
-##############################################################################
+######################################################################################
 # 3. Master coded/derived variables
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
 long_data <- long_data %>% mutate(ariapgp = recode(ariapgp, 
                                             `1` = 0,
@@ -77,15 +78,24 @@ long_data$vig_hous_time <- ifelse(long_data$vig_hous_time>840,840,long_data$vig_
 
 long_data$weighted_activity_time <- (1*long_data$walking_time) + (1*long_data$moderate_time) + (2*long_data$vig_leis_time)
 
+long_data$b_cancer_ever <- with(long_data, ave(b_cancer_ever, idproj, FUN=function(f) min(f, na.rm=T)))
+long_data$b_cancer_ever <- ifelse(long_data$b_cancer_ever>1,NA,long_data$b_cancer_ever)
+
+long_data$b_depression_ever <- with(long_data, ave(b_depression_ever, idproj, FUN=function(f) min(f, na.rm=T)))
+long_data$b_depression_ever <- ifelse(long_data$b_depression_ever>1,NA,long_data$b_depression_ever)
+
+long_data$b_anxiety_ever <- with(long_data, ave(b_anxiety_ever, idproj, FUN=function(f) min(f, na.rm=T)))
+long_data$b_anxiety_ever <- ifelse(long_data$b_anxiety_ever>1,NA,long_data$b_anxiety_ever)
+
 ny_list <- c("cancer_3yr","arthritis_3yr","depression_3yr","anxiety_3yr","live_u18","live_o18","vegetables","fruit")
 long_data[,ny_list] <- lapply(long_data[,ny_list], factor, labels=c("No","Yes"))
 long_data$whobmigroup <- factor(long_data$whobmigroup, labels=c("Underweight","Healthy","Overweight","Obese"))
 
 long_data <- subset(long_data, select = -c(alcfre,alcqnt,walking_time,moderate_time,vig_leis_time,vig_hous_time))
 
-##############################################################################
+######################################################################################
 # 4. Reshape to Wide and Back to long 
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
 # 4.1 Generate indicator of whether wave was completed, then reshape to wide
 long_data$censored <- 1
@@ -128,8 +138,8 @@ imp_data <- reshape(wide_data,
 imp_data <- imp_data[which(imp_data$censored==1),]
 imp_data <- subset(imp_data, select=-censored)
 
-##############################################################################
+######################################################################################
 # 5. Save data in long form, ready for imputation
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
-save(imp_data,file=paste0(workdir,"Physical activity trajectories/Data/imputation data.RData.RData"))
+save(imp_data,file=paste0(workdir,"Data/imputation data.RData.RData"))

@@ -27,17 +27,17 @@ args <- as.numeric(commandArgs(trailingOnly = TRUE))
 seeds <- c("395702","663452","941566","907543","237738","561682","266872","162583","248138","984238")
 set.seed(seeds[args[1]])
 
-##############################################################################
+######################################################################################
 # 2. Load data 
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
 load(paste0(workdir,"Data/primary analysis data - wide form.RData"))
 ltmle_data <- imp_primary
 rm(imp_primary)
 
-##############################################################################
-# 4. Define LTMLE parameters 
-#-----------------------------------------------------------------------------
+######################################################################################
+# 3. Define LTMLE parameters 
+#-------------------------------------------------------------------------------------
 
 theta.set <- c(45,50,55,60,65,70)
 
@@ -57,9 +57,9 @@ colnames(sum.measures) <- c("stop_45","stop_50","stop_55","stop_60","stop_65","s
 
 msm.formula <- "Y ~ stop_50 + stop_55 + stop_60 + stop_65 + stop_70 + start_50 + start_55 + start_60 + start_65"
 
-##############################################################################
-# 5. Define included variables and functional forms 
-#-----------------------------------------------------------------------------
+######################################################################################
+# 4. Define included variables and functional forms 
+#-------------------------------------------------------------------------------------
 
 cnodes <- c("censored3","censored4","censored5","censored6","censored7","censored8","censored9")
 anodes <- c("activity_bin3","activity_bin4","activity_bin5","activity_bin6","activity_bin7","activity_bin8")
@@ -116,9 +116,9 @@ gform <- c(censored3=c3_form,activity_bin3=g3_form,
            censored8=c8_form,activity_bin8=g8_form,
            censored9=c9_form)
 
-##############################################################################
-# 6. Define SuperLearner Libraries
-#-----------------------------------------------------------------------------
+######################################################################################
+# 5. Define SuperLearner Libraries
+#-------------------------------------------------------------------------------------
 
 ranger_128 <- create.Learner("SL.ranger", params = list(num.trees = 128))
 
@@ -127,9 +127,9 @@ SLlib <- list(Q=c("SL.mean","SL.glm","SL.gam"),
 SLlib2 <- list(Q=c("SL.mean","SL.glm","SL.gam"),
                g=c("SL.mean","SL.glm","SL.gam",ranger_128$names))
 
-##############################################################################
-# 7. Setup parallel processing environment
-#-----------------------------------------------------------------------------
+######################################################################################
+# 6. Setup parallel processing environment
+#-------------------------------------------------------------------------------------
 
 numcores <- 4
 cl <- makeCluster(numcores)
@@ -137,13 +137,13 @@ parallel::clusterEvalQ(cl, workdir <- "Y:/PRJ-prc_alswh/")
 parallel::clusterEvalQ(cl, libs <- c("SuperLearner","glmnet","ranger","arm","ltmle"))
 parallel::clusterEvalQ(cl, lapply(libs, library, character.only = TRUE))
 parallel::clusterEvalQ(cl, ranger_128 <- create.Learner("SL.ranger", params = list(num.trees = 128)))
-parallel::clusterExport(cl, list("imp","cnodes","anodes","lnodes","qform","gform",
+parallel::clusterExport(cl, list("ltmle_data","cnodes","anodes","lnodes","qform","gform",
                                  "theta.set","sum.measures","msm.formula",
                                  "SLlib","SLlib2"))
 
-##############################################################################
-# 8. Run LTMLE models 
-#-----------------------------------------------------------------------------
+######################################################################################
+# 7. Run LTMLE models 
+#-------------------------------------------------------------------------------------
 
 outcomes <- c("pcsa9","mcsa9","pf9","rp9","bp9","gh9","vt9","sf9","re9","mh9")
 
@@ -151,10 +151,8 @@ outcome <- outcomes[args[1]]
 
 fit <- parLapply(cl,ltmle_data,function (x,outcome=y) {
   
-  x <- x[,c(2:141,which(colnames(x)==outcome))]
-  x <- subset(x, select=,c("cancer_3yr2","arthritis_3yr2","depression_3yr2","anxiety_3yr2","vegetables2","fruit2",
-                           "vegetables3","fruit3","alcliferisk3","alcepisrisk3",
-                           "vegetables7","fruit7"))
+  x <- x[,c(2:140,which(colnames(x)==outcome))]
+  x <- subset(x, select=,c("vegetables2","fruit2","vegetables3","fruit3","alcliferisk3","alcepisrisk3","vegetables7","fruit7"))
   
   ynodes <- outcome
   names(qform)[6] <- outcome
@@ -190,14 +188,15 @@ fit <- parLapply(cl,ltmle_data,function (x,outcome=y) {
                             regimes = regimes,
                             summary.measures = sum.measures,
                             working.msm = msm.formula,
-                            Yrange = c(0,100))
+                            Yrange = c(0,100),
+                            SL.library = SLlib2)
   
 },
 outcome=outcome)
 
-##############################################################################
-# 9. Save output
-#-----------------------------------------------------------------------------
+######################################################################################
+# 8. Save output
+#-------------------------------------------------------------------------------------
 
 save(fit,file=paste0(workdir,"Results/sensitivity-2-results-",outcome,".RData"))
 
