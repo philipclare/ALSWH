@@ -1,7 +1,7 @@
 ######################################################################################
 ##   
 ## Effects of physical activity on health-related quality of life
-## LTMLE MSM Analysis of dynamic regimes of physical activity on health outcomes
+## Sensitivity analysis excluding variables wholly missing in some waves
 ## Date: 20 September 2022
 ## OSF Registration: https://osf.io/6zkcw
 ##
@@ -63,21 +63,21 @@ msm.formula <- "Y ~ stop_50 + stop_55 + stop_60 + stop_65 + stop_70 + start_50 +
 
 cnodes <- c("censored3","censored4","censored5","censored6","censored7","censored8","censored9")
 anodes <- c("activity_bin3","activity_bin4","activity_bin5","activity_bin6","activity_bin7","activity_bin8")
-lnodes <- c("marital2","age2","ariapgp2","employ2","seifadis2","live_u182","live_o182","cancer_3yr2","arthritis_3yr2","depression_3yr2","anxiety_3yr2","cesd102","mnstrs2","whobmigroup2","vegetables2","fruit2","alcliferisk2","alcepisrisk2","smokst2",
-            "marital3","age3","ariapgp3","employ3","seifadis3","live_u183","live_o183","cancer_3yr3","arthritis_3yr3","depression_3yr3","anxiety_3yr3","cesd103","mnstrs3","whobmigroup3","vegetables3","fruit3","alcliferisk3","alcepisrisk3","smokst3",
+lnodes <- c("marital2","age2","ariapgp2","employ2","seifadis2","live_u182","live_o182","cesd102","mnstrs2","whobmigroup2","alcliferisk2","alcepisrisk2","smokst2",
+            "marital3","age3","ariapgp3","employ3","seifadis3","live_u183","live_o183","cancer_3yr3","arthritis_3yr3","depression_3yr3","anxiety_3yr3","cesd103","mnstrs3","whobmigroup3","smokst3",
             "marital4","age4","ariapgp4","employ4","seifadis4","live_u184","live_o184","cancer_3yr4","arthritis_3yr4","depression_3yr4","anxiety_3yr4","cesd104","mnstrs4","whobmigroup4","vegetables4","fruit4","alcliferisk4","alcepisrisk4","smokst4",
             "marital5","age5","ariapgp5","employ5","seifadis5","live_u185","live_o185","cancer_3yr5","arthritis_3yr5","depression_3yr5","anxiety_3yr5","cesd105","mnstrs5","whobmigroup5","vegetables5","fruit5","alcliferisk5","alcepisrisk5","smokst5",
             "marital6","age6","ariapgp6","employ6","seifadis6","live_u186","live_o186","cancer_3yr6","arthritis_3yr6","depression_3yr6","anxiety_3yr6","cesd106","mnstrs6","whobmigroup6","vegetables6","fruit6","alcliferisk6","alcepisrisk6","smokst6",
-            "marital7","age7","ariapgp7","employ7","seifadis7","live_u187","live_o187","cancer_3yr7","arthritis_3yr7","depression_3yr7","anxiety_3yr7","cesd107","mnstrs7","whobmigroup7","vegetables7","fruit7","alcliferisk7","alcepisrisk7","smokst7")
+            "marital7","age7","ariapgp7","employ7","seifadis7","live_u187","live_o187","cancer_3yr7","arthritis_3yr7","depression_3yr7","anxiety_3yr7","cesd107","mnstrs7","whobmigroup7","alcliferisk7","alcepisrisk7","smokst7")
 
 q_base <- "Q.kplus1 ~ b_wtarea + b_pcsa + b_mcsa + b_gh + b_pf + b_re + b_rp + b_cobcat + b_bp + b_educ + b_mh + b_vt + b_sf + b_cancer_ever + b_depression_ever + b_anxiety_ever"
 g_base <- "b_pcsa + b_mcsa + b_gh + b_pf + b_re + b_rp + b_cobcat + b_bp + b_educ + b_mh + b_vt + b_sf + b_cancer_ever + b_depression_ever + b_anxiety_ever"
-w2_conf <- "marital2 + age2 + ariapgp2 + employ2 + seifadis2 + live_u182 + live_o182 + cancer_3yr2 + arthritis_3yr2 + depression_3yr2 + anxiety_3yr2 + cesd102 + mnstrs2 + whobmigroup2 + vegetables2 + fruit2 + alcliferisk2 + alcepisrisk2 + smokst2"
-w3_conf <- "marital3 + age3 + ariapgp3 + employ3 + seifadis3 + live_u183 + live_o183 + cancer_3yr3 + arthritis_3yr3 + depression_3yr3 + anxiety_3yr3 + cesd103 + mnstrs3 + whobmigroup3 + vegetables3 + fruit3 + alcliferisk3 + alcepisrisk3 + smokst3"
+w2_conf <- "marital2 + age2 + ariapgp2 + employ2 + seifadis2 + live_u182 + live_o182 + cesd102 + mnstrs2 + whobmigroup2 + alcliferisk2 + alcepisrisk2 + smokst2"
+w3_conf <- "marital3 + age3 + ariapgp3 + employ3 + seifadis3 + live_u183 + live_o183 + cancer_3yr3 + arthritis_3yr3 + depression_3yr3 + anxiety_3yr3 + cesd103 + mnstrs3 + whobmigroup3 + smokst3"
 w4_conf <- "marital4 + age4 + ariapgp4 + employ4 + seifadis4 + live_u184 + live_o184 + cancer_3yr4 + arthritis_3yr4 + depression_3yr4 + anxiety_3yr4 + cesd104 + mnstrs4 + whobmigroup4 + vegetables4 + fruit4 + alcliferisk4 + alcepisrisk4 + smokst4"
 w5_conf <- "marital5 + age5 + ariapgp5 + employ5 + seifadis5 + live_u185 + live_o185 + cancer_3yr5 + arthritis_3yr5 + depression_3yr5 + anxiety_3yr5 + cesd105 + mnstrs5 + whobmigroup5 + vegetables5 + fruit5 + alcliferisk5 + alcepisrisk5 + smokst5"
 w6_conf <- "marital6 + age6 + ariapgp6 + employ6 + seifadis6 + live_u186 + live_o186 + cancer_3yr6 + arthritis_3yr6 + depression_3yr6 + anxiety_3yr6 + cesd106 + mnstrs6 + whobmigroup6 + vegetables6 + fruit6 + alcliferisk6 + alcepisrisk6 + smokst6"
-w7_conf <- "marital7 + age7 + ariapgp7 + employ7 + seifadis7 + live_u187 + live_o187 + cancer_3yr7 + arthritis_3yr7 + depression_3yr7 + anxiety_3yr7 + cesd107 + mnstrs7 + whobmigroup7 + vegetables7 + fruit7 + alcliferisk7 + alcepisrisk7 + smokst7"
+w7_conf <- "marital7 + age7 + ariapgp7 + employ7 + seifadis7 + live_u187 + live_o187 + cancer_3yr7 + arthritis_3yr7 + depression_3yr7 + anxiety_3yr7 + cesd107 + mnstrs7 + whobmigroup7 + alcliferisk7 + alcepisrisk7 + smokst7"
 
 q3_form <- paste(q_base,                        w2_conf,sep=" + ")
 q4_form <- paste(q_base,w2_conf,"activity_bin3",w3_conf,sep=" + ")
@@ -151,6 +151,11 @@ outcome <- outcomes[args[1]]
 
 fit <- parLapply(cl,ltmle_data,function (x,outcome=y) {
   
+  x <- x[,c(2:141,which(colnames(x)==outcome))]
+  x <- subset(x, select=,c("cancer_3yr2","arthritis_3yr2","depression_3yr2","anxiety_3yr2","vegetables2","fruit2",
+                           "vegetables3","fruit3","alcliferisk3","alcepisrisk3",
+                           "vegetables7","fruit7"))
+  
   ynodes <- outcome
   names(qform)[6] <- outcome
   
@@ -175,7 +180,7 @@ fit <- parLapply(cl,ltmle_data,function (x,outcome=y) {
     regimes[, 6, cnt] <- x$age7 > theta.set[theta.index]
   }
   
-  model_fit_msm <- ltmleMSM(x[,c(2:141,which(colnames(x)==outcome))],
+  model_fit_msm <- ltmleMSM(x,
                             Cnodes = cnodes,
                             Anodes = anodes,
                             Lnodes = lnodes,
@@ -194,5 +199,5 @@ outcome=outcome)
 # 9. Save output
 #-----------------------------------------------------------------------------
 
-save(fit,file=paste0(workdir,"Results/primary-results-",outcome,".RData"))
+save(fit,file=paste0(workdir,"Results/sensitivity-2-results-",outcome,".RData"))
 

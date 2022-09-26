@@ -1,7 +1,7 @@
 ######################################################################################
 ##   
 ## Effects of physical activity on health-related quality of life
-## LTMLE MSM Analysis of dynamic regimes of physical activity on health outcomes
+## Sensitivity analysis using lower physical activity cut-point
 ## Date: 20 September 2022
 ## OSF Registration: https://osf.io/6zkcw
 ##
@@ -31,9 +31,9 @@ set.seed(seeds[args[1]])
 # 2. Load data 
 #-----------------------------------------------------------------------------
 
-load(paste0(workdir,"Data/primary analysis data - wide form.RData"))
-ltmle_data <- imp_primary
-rm(imp_primary)
+load(paste0(workdir,"Data/sensitivity analysis data - wide form.RData"))
+ltmle_data <- imp_sensitivity
+rm(imp_sensitivity)
 
 ##############################################################################
 # 4. Define LTMLE parameters 
@@ -194,5 +194,5 @@ outcome=outcome)
 # 9. Save output
 #-----------------------------------------------------------------------------
 
-save(fit,file=paste0(workdir,"Results/primary-results-",outcome,".RData"))
+save(fit,file=paste0(workdir,"Results/sensitivity-1-results-",outcome,".RData"))
 
