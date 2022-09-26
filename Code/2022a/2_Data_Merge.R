@@ -35,6 +35,8 @@ long_data <- rbind.fill(w2data,w3data,w4data,w5data,w6data,w7data,w8data,w9data)
 
 long_data <- merge(long_data,w1data,by="idproj")
 
+rm(w1data,w2data,w3data,w4data,w5data,w6data,w7data,w8data,w9data)
+
 ##############################################################################
 # 3. Master coded/derived variables
 #-----------------------------------------------------------------------------
@@ -98,21 +100,21 @@ wide_data <- reshape(long_data,
                      dir="wide")
 
 # 4.2 Recode missing censored variables to 0 where NA to indicate wave was not completed
-c_vars <- c("censored2","censored3","censored4","censored5","censored6","censored7")
+c_vars <- c("censored2","censored3","censored4","censored5","censored6","censored7","censored8","censored9")
 wide_data[,c_vars] <- lapply(wide_data[,c_vars],function (x) {
   ifelse(is.na(x),0,x)
 })
 
 # 4.3 Then pass over waves to treat any observations subsequent to first loss as also lost
-for (i in 1:5) {
-  wide_data[,c_vars[i+1]] <- ifelse(wide_data[,c_vars[i]]==0,0,wide_data[,c_vars[i+1]])
+for (i in 7:1) {
+  wide_data[,c_vars[i]] <- ifelse(wide_data[,c_vars[i+1]]==1,1,wide_data[,c_vars[i]])
 }
 
 # 4.4 Drop participants with low functioning at wave 2
-wide_data <- wide_data[which(wide_data$pf2>=48.30013), ]
+wide_data <- wide_data[which(wide_data$b_pf>=54.8), ]
 
 # 4.5 Reshape back to wide
-imp_data1 <- reshape(wide_data,
+imp_data <- reshape(wide_data,
                      timevar=c("wave"), 
                      idvar=c("idproj"),
                      v.names=c("censored","marital","age","ariapgp","employ","seifadis","live_u18","live_o18",
@@ -123,11 +125,11 @@ imp_data1 <- reshape(wide_data,
                      dir="long")
 
 # 4.6 Create alternative long form data with censored waves excluded
-imp_data2 <- imp_data1[which(imp_data1$censored==1),]
+imp_data <- imp_data[which(imp_data$censored==1),]
+imp_data <- subset(imp_data, select=-censored)
 
 ##############################################################################
 # 5. Save data in long form, ready for imputation
 #-----------------------------------------------------------------------------
 
-save(imp_data1,file=paste0(workdir,"Physical activity trajectories/Data/imputation data - all.RData.RData"))
-save(imp_data2,file=paste0(workdir,"Physical activity trajectories/Data/imputation data - no lost.RData.RData"))
+save(imp_data,file=paste0(workdir,"Physical activity trajectories/Data/imputation data.RData.RData"))

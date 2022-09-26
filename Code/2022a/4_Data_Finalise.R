@@ -10,7 +10,7 @@
 
 workdir <- "Y:/PRJ-prc_alswh/"
 
-libs <- c("plyr","dplyr")
+libs <- c("plyr","dplyr","ltmle","gtools")
 missing <- !libs %in% installed.packages()
 if (any(missing)) {
   install.packages(libs[missing])
@@ -38,24 +38,34 @@ imp <- lapply(imp,function (x) {
 })
 
 ##############################################################################
-# 4. Reshape to wide, drop unnecessary variables and structure for LTMLE
+# 3. Reshape to wide, drop unnecessary variables and structure for LTMLE
 #-----------------------------------------------------------------------------
 
 seifa_list <- c("seifadis2","seifadis3","seifadis4","seifadis5","seifadis6","seifadis7")
+cens_list <- c("censored3","censored4","censored5","censored6","censored7","censored8","censored9")
 
 imp <- lapply(imp,function (x) {
+  x$censored <- 1
+  
   x <- x[order(x$wave),]
   x <- reshape(x,
                timevar=c("wave"), 
                idvar=c("idproj"),
                v.names=c("b_pcsa","b_mcsa","b_gh","b_pf","b_re","b_rp","b_cobcat","b_bp","b_educ","b_mh","b_vt","b_sf",
-                         "activity_bin","marital","age","ariapgp","employ","seifadis","live_u18","live_o18",
+                         "censored","activity_bin","marital","age","ariapgp","employ","seifadis","live_u18","live_o18",
                          "cancer_3yr","arthritis_3yr","depression_3yr","anxiety_3yr",
                          "cesd10","mnstrs","whobmigroup","vegetables","fruit",
                          "alcliferisk","alcepisrisk","smokst",
                          "pcsa","mcsa","pf","rp","bp","gh","vt","sf","re","mh"),
                sep = "",
                dir="wide")
+  
+  x <- subset(x, select=-censored2)
+  
+  x[,cens_list] <- lapply(x[,cens_list], function (y) {
+    y <- ifelse(is.na(y),0,y)
+    y <- BinaryToCensoring(is.uncensored=y)
+    })
   
   x <- subset(x, select = -c(b_pcsa3,b_mcsa3,b_gh3,b_pf3,b_re3,b_rp3,b_cobcat3,b_bp3,b_educ3,b_mh3,b_vt3,b_sf3,
                              b_pcsa4,b_mcsa4,b_gh4,b_pf4,b_re4,b_rp4,b_cobcat4,b_bp4,b_educ4,b_mh4,b_vt4,b_sf4,
@@ -96,7 +106,19 @@ imp <- lapply(imp,function (x) {
                              cancer_3yr9,arthritis_3yr9,depression_3yr9,anxiety_3yr9,
                              cesd109,mnstrs9,whobmigroup9,vegetables9,fruit9,alcliferisk9,alcepisrisk9,smokst9,activity_bin9))
   
+  x[,c("marital2","marital3","marital4","marital5","marital6","marital7")] <- lapply(x[,c("marital2","marital3","marital4","marital5","marital6","marital7")], factor)
+  x[,c("ariapgp2","ariapgp3","ariapgp4","ariapgp5","ariapgp6","ariapgp7")] <- lapply(x[,c("ariapgp2","ariapgp3","ariapgp4","ariapgp5","ariapgp6","ariapgp7")], factor)
+  x[,c("seifadis2","seifadis3","seifadis4","seifadis5","seifadis6","seifadis7")] <- lapply(x[,c("seifadis2","seifadis3","seifadis4","seifadis5","seifadis6","seifadis7")], factor)
+  x[,c("whobmigroup2","whobmigroup3","whobmigroup4","whobmigroup5","whobmigroup6","whobmigroup7")] <- lapply(x[,c("whobmigroup2","whobmigroup3","whobmigroup4","whobmigroup5","whobmigroup6","whobmigroup7")], factor)
+  x[,c("smokst2","smokst3","smokst4","smokst5","smokst6","smokst7")] <- lapply(x[,c("smokst2","smokst3","smokst4","smokst5","smokst6","smokst7")], factor)
+
+  x
 })
 
+##############################################################################
+# 4. Save final, analysis-ready dataset
+#-----------------------------------------------------------------------------
+
 save(imp,file=paste0(workdir,"Physical activity trajectories/Data/analysis data - wide form.RData"))
+
 
