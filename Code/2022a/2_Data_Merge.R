@@ -18,9 +18,9 @@ if (any(missing)) {
 }
 lapply(libs, library, character.only = TRUE)
 
-##############################################################################
+######################################################################################
 # 2. Load individual wave data and merge into long form
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
 load(file=paste0(workdir,"Data/w1 pa.RData"))
 load(file=paste0(workdir,"Data/w2 pa.RData"))
@@ -38,9 +38,9 @@ long_data <- merge(long_data,w1data,by="idproj")
 
 rm(w1data,w2data,w3data,w4data,w5data,w6data,w7data,w8data,w9data)
 
-##############################################################################
+######################################################################################
 # 3. Master coded/derived variables
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
 long_data <- long_data %>% mutate(ariapgp = recode(ariapgp, 
                                             `1` = 0,
@@ -93,9 +93,9 @@ long_data$whobmigroup <- factor(long_data$whobmigroup, labels=c("Underweight","H
 
 long_data <- subset(long_data, select = -c(alcfre,alcqnt,walking_time,moderate_time,vig_leis_time,vig_hous_time))
 
-##############################################################################
+######################################################################################
 # 4. Reshape to Wide and Back to long 
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
 # 4.1 Generate indicator of whether wave was completed, then reshape to wide
 long_data$censored <- 1
@@ -138,8 +138,8 @@ imp_data <- reshape(wide_data,
 imp_data <- imp_data[which(imp_data$censored==1),]
 imp_data <- subset(imp_data, select=-censored)
 
-##############################################################################
+######################################################################################
 # 5. Save data in long form, ready for imputation
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
 save(imp_data,file=paste0(workdir,"Data/imputation data.RData.RData"))

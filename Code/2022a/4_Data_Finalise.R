@@ -18,15 +18,15 @@ if (any(missing)) {
 }
 lapply(libs, library, character.only = TRUE)
 
-##############################################################################
+######################################################################################
 # 2. Load imputed data
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
 load(file=paste0(workdir,"Data/imputed data - long form.RData"))
 
-##############################################################################
+######################################################################################
 # 3. Create computed/derived variables
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 
 imp <- lapply(imp,function (x) {
   x$alcliferisk <- ifelse(x$alcfq>10,1,0)
@@ -39,9 +39,9 @@ imp <- lapply(imp,function (x) {
   x
 })
 
-##############################################################################
-# 3. Reshape to wide, drop unnecessary variables and structure for LTMLE
-#-----------------------------------------------------------------------------
+######################################################################################
+# 4. Reshape to wide, drop unnecessary variables and structure for LTMLE
+#-------------------------------------------------------------------------------------
 
 seifa_list <- c("seifadis2","seifadis3","seifadis4","seifadis5","seifadis6","seifadis7")
 cens_list <- c("censored3","censored4","censored5","censored6","censored7","censored8","censored9")
@@ -70,7 +70,8 @@ imp <- lapply(imp,function (x) {
     y <- BinaryToCensoring(is.uncensored=y)
     })
   
-  x <- subset(x, select = -c(b_pcsa3,b_mcsa3,b_gh3,b_pf3,b_re3,b_rp3,b_cobcat3,b_bp3,b_educ3,b_mh3,b_vt3,b_sf3,b_cancer_ever3,b_depression_ever3,b_anxiety_ever3,
+  x <- subset(x, select = -c(cancer_3yr2,arthritis_3yr2,depression_3yr2,anxiety_3yr2,
+                             b_pcsa3,b_mcsa3,b_gh3,b_pf3,b_re3,b_rp3,b_cobcat3,b_bp3,b_educ3,b_mh3,b_vt3,b_sf3,b_cancer_ever3,b_depression_ever3,b_anxiety_ever3,
                              b_pcsa4,b_mcsa4,b_gh4,b_pf4,b_re4,b_rp4,b_cobcat4,b_bp4,b_educ4,b_mh4,b_vt4,b_sf4,b_cancer_ever4,b_depression_ever4,b_anxiety_ever4,
                              b_pcsa5,b_mcsa5,b_gh5,b_pf5,b_re5,b_rp5,b_cobcat5,b_bp5,b_educ5,b_mh5,b_vt5,b_sf5,b_cancer_ever5,b_depression_ever5,b_anxiety_ever5,
                              b_pcsa6,b_mcsa6,b_gh6,b_pf6,b_re6,b_rp6,b_cobcat6,b_bp6,b_educ6,b_mh6,b_vt6,b_sf6,b_cancer_ever6,b_depression_ever6,b_anxiety_ever6,
@@ -110,7 +111,7 @@ imp <- lapply(imp,function (x) {
                              pcsa8,mcsa8,pf8,rp8,bp8,gh8,vt8,sf8,re8,mh8,
                              marital9,age9,ariapgp9,employ9,seifadis9,live_u189,live_o189,
                              cancer_3yr9,arthritis_3yr9,depression_3yr9,anxiety_3yr9,
-                             cesd109,mnstrs9,whobmigroup9,vegetables9,fruit9,alcliferisk9,alcepisrisk9,smokst9,activity_bin9))
+                             cesd109,mnstrs9,whobmigroup9,vegetables9,fruit9,alcliferisk9,alcepisrisk9,smokst9,activity_bin9,activity_bin_sens9))
   
   x[,c("marital2","marital3","marital4","marital5","marital6","marital7")] <- lapply(x[,c("marital2","marital3","marital4","marital5","marital6","marital7")], factor)
   x[,c("ariapgp2","ariapgp3","ariapgp4","ariapgp5","ariapgp6","ariapgp7")] <- lapply(x[,c("ariapgp2","ariapgp3","ariapgp4","ariapgp5","ariapgp6","ariapgp7")], factor)
@@ -136,9 +137,9 @@ imp_sensitivity <- lapply(imp, function (x) {
            activity_bin8 = activity_bin_sens8)
 })
 
-##############################################################################
-# 4. Save final, analysis-ready dataset
-#-----------------------------------------------------------------------------
+######################################################################################
+# 5. Save final, analysis-ready dataset
+#-------------------------------------------------------------------------------------
 
 save(imp_primary,file=paste0(workdir,"Data/primary analysis data - wide form.RData"))
 save(imp_sensitivity,file=paste0(workdir,"Data/sensitivity analysis data - wide form.RData"))
