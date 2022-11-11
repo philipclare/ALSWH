@@ -2,7 +2,7 @@
 ##   
 ## Effects of physical activity on health-related quality of life
 ## Extract key variables from separate wave datasets
-## Date: 16 September 2022
+## Date: 29 September 2022
 ## OSF Registration: https://osf.io/6zkcw
 ##
 ######################################################################################
@@ -52,7 +52,7 @@ w1data <- w1data %>% mutate(b_cobcat = recode(b_cobcat,
                                             `5` = 1))
 w1data$b_cobcat <- factor(w1data$b_cobcat,labels=c("Australia","Other"))
 
-save(w1data,file=paste0(workdir,"Physical activity trajectories/Data/w1 pa.RData"))
+save(w1data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w1 pa.RData"))
 
 ######################################################################################
 # 3. Wave 2 Data
@@ -66,7 +66,7 @@ w2data <- zap_formats(w2data)
 names(w2data) <- tolower(names(w2data))
 w2data <- subset(w2data, select = c(idproj,
                                       m2age,m2q54mn,m2q54sc,m2ariapgp,m2i_disad,m2marital,m2whobmigroup,m2q74b,m2q74c,
-                                      m2q74d,m2smokst,m2q39,m2q40,m2q41,m2mnstrs,m2cesd10,m2pf,m2mh,m2gh,m2re,m2rp,m2sf,m2bp ,
+                                      m2q74d,m2smokst,m2q39,m2q40,m2q41,m2mnstrs,m2cesd10,m2pf,m2mh,m2gh,m2re,m2rp,m2sf,m2bp,m2vt,
                                       m2q20k,m2q20l,m2q20m,m2q20n,m2q20o,m2q20p,m2q20q,m2pcsa,m2mcsa))
 w2data$wave <- 2
 
@@ -113,7 +113,7 @@ w2data <- w2data %>% mutate(alcqnt = recode(alcqnt,
 
 w2data <- subset(w2data, select = -c(q20k,q20l,q20m,q20n,q20o,q20p,q20q,q54mn,q54sc,q74b,q74c,q74d))
 
-save(w2data,file=paste0(workdir,"Physical activity trajectories/Data/w2 pa.RData"))
+save(w2data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w2 pa.RData"))
 
 ######################################################################################
 # 4. Wave 3 Data
@@ -163,7 +163,7 @@ w3data <- subset(w3data, select = -c(q35m,q35n,q35o,q35p,q35y,
                                      q71a,q71b,q71c,q71e,
                                      q90c,q90d,q90e))
 
-save(w3data,file=paste0(workdir,"Physical activity trajectories/Data/w3 pa.RData"))
+save(w3data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w3 pa.RData"))
 
 ######################################################################################
 # 5. Wave 4 Data
@@ -246,7 +246,7 @@ w4data <- subset(w4data, select = -c(q32l,q32m,q32n,q32o,q32p,q32w,
                                      q68a,q68c,
                                      q89c,q89d,q89e))
 
-save(w4data,file=paste0(workdir,"Physical activity trajectories/Data/w4 pa.RData"))
+save(w4data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w4 pa.RData"))
 
 ######################################################################################
 # 6. Wave 5 Data
@@ -334,7 +334,7 @@ w5data <- subset(w5data, select = -c(q38c,q38d,q38e,q38m,q38n,q38o,q38p,q38w,
                                      q85a,q85b,q85c,q85e,
                                      q107c,q107d,q107e))
 
-save(w5data,file=paste0(workdir,"Physical activity trajectories/Data/w5 pa.RData"))
+save(w5data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w5 pa.RData"))
 
 ######################################################################################
 # 7. Wave 6 Data
@@ -428,7 +428,7 @@ w6data <- subset(w6data, select = -c(q38c,q38d,q38e,q38m,q38n,q38o,q38p,q38x,
                                      q84a,q84b,q84c,q84e,
                                      q111c,q111d,q111e))
 
-save(w6data,file=paste0(workdir,"Physical activity trajectories/Data/w6 pa.RData"))
+save(w6data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w6 pa.RData"))
 
 ######################################################################################
 # 8. Wave 7 Data
@@ -495,7 +495,7 @@ w7data <- subset(w7data, select = -c(q32d,q32e,q32f,q32h,q32v,q32w,q32x,q32y,q32
                                      q83a,q83b,q83c,q83e,
                                      q101c,q101d))
 
-save(w7data,file=paste0(workdir,"Physical activity trajectories/Data/w7 pa.RData"))
+save(w7data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w7 pa.RData"))
 
 ######################################################################################
 # 9. Wave 8 Data
@@ -593,7 +593,7 @@ w8data <- subset(w8data, select = -c(q30d,q30e,q30f,q30h,q30v,q30w,q30x,q30y,q30
                                      q66a,q66b,q66c,q66e,
                                      q96c,q96d))
 
-save(w8data,file=paste0(workdir,"Physical activity trajectories/Data/w8 pa.RData"))
+save(w8data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w8 pa.RData"))
 
 ######################################################################################
 # 10. Wave 9 Data
@@ -614,5 +614,5 @@ w9data <- w9data %>%
   rename(pcsa = pcs_abs,
          mcsa = mcs_abs)
 
-save(w9data,file=paste0(workdir,"Physical activity trajectories/Data/w9 pa.RData"))
+save(w9data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w9 pa.RData"))
 

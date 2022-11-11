@@ -2,21 +2,26 @@
 ##   
 ## Effects of physical activity on health-related quality of life
 ## Extract results from LTMLE MSM fits and pool using Rubin's rules
-## Date: 16 September 2022
+## Date: 4 October 2022
 ## OSF Registration: https://osf.io/6zkcw
 ##
 ######################################################################################
 # 1. Setup Environment
 #-------------------------------------------------------------------------------------
 
-workdir <- "Y:/PRJ-prc_alswh/Physical activity trajectories/"
+workdir <- "R:/PRJ-prc_alswh/Paper 1 - Health-related quality of life/"
 
-libs <- c("ltmle","parallel","threadr","Amelia","ggplot2")
+libs <- c("ltmle","parallel","Amelia","ggplot2")
 missing <- !libs %in% installed.packages()
 if (any(missing)) {
   install.packages(libs[missing])
 }
 lapply(libs, library, character.only = TRUE)
+
+read_rdata <- function(fileName) {
+  load(fileName)
+  get(ls()[ls() != "fileName"])
+}
 
 names <- c("pcsa_mean","pcsa_se","mcsa_mean","mcsa_se",
            "pf_mean","pf_se","rp_mean","rp_se",
@@ -29,67 +34,51 @@ names <- c("pcsa_mean","pcsa_se","mcsa_mean","mcsa_se",
 #-------------------------------------------------------------------------------------
 
 # 2.1. Load model fit objects 
-primary_fit <- list(pcsa_fit = read_rdata(file=paste0(workdir,"Results/primary-results-pcsa9.RData")),
-                 mcsa_fit = read_rdata(file=paste0(workdir,"Results/primary-results-mcsa9.RData")),
-                 pf_fit = read_rdata(file=paste0(workdir,"Results/primary-results-pf9.RData")),
-                 rp_fit = read_rdata(file=paste0(workdir,"Results/primary-results-rp9.RData")),
-                 bp_fit = read_rdata(file=paste0(workdir,"Results/primary-results-bp9.RData")),
-                 gh_fit = read_rdata(file=paste0(workdir,"Results/primary-results-gh9.RData")),
-                 vt_fit = read_rdata(file=paste0(workdir,"Results/primary-results-vt9.RData")),
-                 sf_fit = read_rdata(file=paste0(workdir,"Results/primary-results-sf9.RData")),
-                 re_fit = read_rdata(file=paste0(workdir,"Results/primary-results-re9.RData")),
-                 mh_fit = read_rdata(file=paste0(workdir,"Results/primary-results-mh9.RData")))
+p_pcsa_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-pcsa9-1.RData")),
+                 read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-pcsa9-2.RData")),
+                 read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-pcsa9-3.RData")),
+                 read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-pcsa9-4.RData")))
+p_mcsa_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-mcsa9-1.RData")),
+                  read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-mcsa9-2.RData")),
+                  read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-mcsa9-3.RData")),
+                  read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-mcsa9-4.RData")))
+p_pf_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-pf9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-pf9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-pf9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-pf9-4.RData")))
+p_rp_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-rp9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-rp9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-rp9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-rp9-4.RData")))
+p_bp_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-bp9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-bp9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-bp9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-bp9-4.RData")))
+p_gh_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-gh9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-gh9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-gh9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-gh9-4.RData")))
+p_vt_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-vt9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-vt9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-vt9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-vt9-4.RData")))
+p_sf_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-sf9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-sf9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-sf9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-sf9-4.RData")))
+p_re_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-re9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-re9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-re9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-re9-4.RData")))
+p_mh_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-mh9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-mh9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-mh9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/primary-results-mh9-4.RData")))
 
-# 2.2. Extract means and SEs from model fits
-primary_res <- lapply(primary_fit, function (y) {
-  
-  res <- lapply(y,function (x) {
-    
-    res <- c(c(plogis(summary(x)$cmat[1,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[2,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[3,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[4,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[5,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[6,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[7,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[8,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[9,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[10,1])))
-    
-    cov.mat <- var(x$IC)
-    
-    gradient <- list(c(res[1]*(1-res[1]), 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                     c(res[2]*(1-res[2]), res[2]*(1-res[2]), 0, 0, 0, 0, 0, 0, 0, 0),
-                     c(res[3]*(1-res[3]), 0, res[3]*(1-res[3]), 0, 0, 0, 0, 0, 0, 0),
-                     c(res[4]*(1-res[4]), 0, 0, res[4]*(1-res[4]), 0, 0, 0, 0, 0, 0),
-                     c(res[5]*(1-res[5]), 0, 0, 0, res[5]*(1-res[5]), 0, 0, 0, 0, 0),
-                     c(res[6]*(1-res[6]), 0, 0, 0, 0, res[6]*(1-res[6]), 0, 0, 0, 0),
-                     c(res[7]*(1-res[7]), 0, 0, 0, 0, 0, res[7]*(1-res[7]), 0, 0, 0),
-                     c(res[8]*(1-res[8]), 0, 0, 0, 0, 0, 0, res[8]*(1-res[8]), 0, 0),
-                     c(res[9]*(1-res[9]), 0, 0, 0, 0, 0, 0, 0, res[9]*(1-res[9]), 0),
-                     c(res[10]*(1-res[10]), 0, 0, 0, 0, 0, 0, 0, 0, res[10]*(1-res[10])))
-    
-    v <- do.call(rbind,lapply(gradient, function(z,x) {
-      v <- t(z) %*% cov.mat %*% z
-      std.dev <- sqrt(v[1, 1] / dim(x$IC)[1])*100
-    },x=x))
-    
-    coef <- c(plogis(summary(x)$cmat[1,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[2,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[3,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[4,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[5,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[6,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[7,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[8,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[9,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[10,1])*100)
-    
-    fin_res <- matrix(cbind(coef,v),nrow=10)
-    
-  })
-  
-})
+# 2.2. Combine into single list of results
+primary_res <- list(p_pcsa_res,p_mcsa_res,
+                    p_pf_res,p_rp_res,p_bp_res,p_gh_res,
+                    p_vt_res,p_sf_res,p_re_res,p_mh_res)
 
 # 2.3. Pool MI results using Rubin's rules
 primary_mi_res <- do.call(cbind,lapply(primary_res, function (y) {
@@ -105,7 +94,7 @@ primary_mi_res <- do.call(cbind,lapply(primary_res, function (y) {
   
 }))
 
-# 2.4 Assign column names and separate out sustained and inititiation results
+# 2.3 Assign column names and separate out sustained and inititiation results
 colnames(primary_mi_res) <- names
 primary_mi_res_sust <- as.data.frame(primary_mi_res[1:6,])
 primary_mi_res_init <- as.data.frame(primary_mi_res[c(6:10,1),])
@@ -117,67 +106,51 @@ primary_mi_res_init$result <- c("start_45","start_50","start_55","start_60","sta
 #-------------------------------------------------------------------------------------
 
 # 3.1. Load model fit objects 
-sensitivity_1_fit <- list(pcsa_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-1-results-pcsa9.RData")),
-                    mcsa_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-1-results-mcsa9.RData")),
-                    pf_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-1-results-pf9.RData")),
-                    rp_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-1-results-rp9.RData")),
-                    bp_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-1-results-bp9.RData")),
-                    gh_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-1-results-gh9.RData")),
-                    vt_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-1-results-vt9.RData")),
-                    sf_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-1-results-sf9.RData")),
-                    re_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-1-results-re9.RData")),
-                    mh_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-1-results-mh9.RData")))
+s1_pcsa_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-pcsa9-1.RData")),
+                  read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-pcsa9-2.RData")),
+                  read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-pcsa9-3.RData")),
+                  read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-pcsa9-4.RData")))
+s1_mcsa_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-mcsa9-1.RData")),
+                  read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-mcsa9-2.RData")),
+                  read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-mcsa9-3.RData")),
+                  read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-mcsa9-4.RData")))
+s1_pf_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-pf9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-pf9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-pf9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-pf9-4.RData")))
+s1_rp_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-rp9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-rp9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-rp9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-rp9-4.RData")))
+s1_bp_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-bp9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-bp9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-bp9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-bp9-4.RData")))
+s1_gh_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-gh9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-gh9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-gh9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-gh9-4.RData")))
+s1_vt_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-vt9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-vt9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-vt9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-vt9-4.RData")))
+s1_sf_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-sf9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-sf9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-sf9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-sf9-4.RData")))
+s1_re_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-re9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-re9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-re9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-re9-4.RData")))
+s1_mh_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-mh9-1.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-mh9-2.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-mh9-3.RData")),
+                read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-1-results-mh9-4.RData")))
 
-# 3.2. Extract means and SEs from model fits
-sensitivity_1_res <- lapply(sensitivity_1_fit, function (y) {
-  
-  res <- lapply(y,function (x) {
-    
-    res <- c(c(plogis(summary(x)$cmat[1,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[2,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[3,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[4,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[5,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[6,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[7,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[8,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[9,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[10,1])))
-    
-    cov.mat <- var(x$IC)
-    
-    gradient <- list(c(res[1]*(1-res[1]), 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                     c(res[2]*(1-res[2]), res[2]*(1-res[2]), 0, 0, 0, 0, 0, 0, 0, 0),
-                     c(res[3]*(1-res[3]), 0, res[3]*(1-res[3]), 0, 0, 0, 0, 0, 0, 0),
-                     c(res[4]*(1-res[4]), 0, 0, res[4]*(1-res[4]), 0, 0, 0, 0, 0, 0),
-                     c(res[5]*(1-res[5]), 0, 0, 0, res[5]*(1-res[5]), 0, 0, 0, 0, 0),
-                     c(res[6]*(1-res[6]), 0, 0, 0, 0, res[6]*(1-res[6]), 0, 0, 0, 0),
-                     c(res[7]*(1-res[7]), 0, 0, 0, 0, 0, res[7]*(1-res[7]), 0, 0, 0),
-                     c(res[8]*(1-res[8]), 0, 0, 0, 0, 0, 0, res[8]*(1-res[8]), 0, 0),
-                     c(res[9]*(1-res[9]), 0, 0, 0, 0, 0, 0, 0, res[9]*(1-res[9]), 0),
-                     c(res[10]*(1-res[10]), 0, 0, 0, 0, 0, 0, 0, 0, res[10]*(1-res[10])))
-    
-    v <- do.call(rbind,lapply(gradient, function(x) {
-      v <- t(x) %*% cov.mat %*% x
-      std.dev <- sqrt(v[1, 1] / dim(ltmle_data)[1])*100
-    }))
-    
-    coef <- c(plogis(summary(x)$cmat[1,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[2,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[3,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[4,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[5,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[6,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[7,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[8,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[9,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[10,1])*100)
-    
-    fin_res <- matrix(cbind(coef,v),nrow=10)
-    
-  })
-  
-})
+# 3.2. Combine into single list of results
+sensitivity_1_res <- list(s1_pcsa_res,s1_mcsa_res,
+                          s1_pf_res,s1_rp_res,s1_bp_res,s1_gh_res,
+                          s1_vt_res,s1_sf_res,s1_re_res,s1_mh_res)
 
 # 3.3. Pool MI results using Rubin's rules
 sensitivity_1_mi_res <- do.call(cbind,lapply(sensitivity_1_res, function (y) {
@@ -205,67 +178,51 @@ sensitivity_1_mi_res_init$result <- c("start_45","start_50","start_55","start_60
 #-------------------------------------------------------------------------------------
 
 # 4.1. Load model fit objects 
-sensitivity_2_fit <- list(pcsa_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-2-results-pcsa9.RData")),
-                          mcsa_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-2-results-mcsa9.RData")),
-                          pf_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-2-results-pf9.RData")),
-                          rp_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-2-results-rp9.RData")),
-                          bp_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-2-results-bp9.RData")),
-                          gh_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-2-results-gh9.RData")),
-                          vt_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-2-results-vt9.RData")),
-                          sf_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-2-results-sf9.RData")),
-                          re_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-2-results-re9.RData")),
-                          mh_fit = read_rdata(file=paste0(workdir,"Results/sensitivity-2-results-mh9.RData")))
+s2_pcsa_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-pcsa9-1.RData")),
+                     read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-pcsa9-2.RData")),
+                     read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-pcsa9-3.RData")),
+                     read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-pcsa9-4.RData")))
+s2_mcsa_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-mcsa9-1.RData")),
+                     read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-mcsa9-2.RData")),
+                     read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-mcsa9-3.RData")),
+                     read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-mcsa9-4.RData")))
+s2_pf_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-pf9-1.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-pf9-2.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-pf9-3.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-pf9-4.RData")))
+s2_rp_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-rp9-1.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-rp9-2.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-rp9-3.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-rp9-4.RData")))
+s2_bp_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-bp9-1.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-bp9-2.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-bp9-3.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-bp9-4.RData")))
+s2_gh_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-gh9-1.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-gh9-2.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-gh9-3.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-gh9-4.RData")))
+s2_vt_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-vt9-1.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-vt9-2.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-vt9-3.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-vt9-4.RData")))
+s2_sf_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-sf9-1.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-sf9-2.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-sf9-3.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-sf9-4.RData")))
+s2_re_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-re9-1.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-re9-2.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-re9-3.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-re9-4.RData")))
+s2_mh_res <- rbind(read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-mh9-1.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-mh9-2.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-mh9-3.RData")),
+                   read_rdata(file=paste0(workdir,"Results/Katana output/sensitivity-2-results-mh9-4.RData")))
 
-# 4.2. Extract means and SEs from model fits
-sensitivity_2_res <- lapply(sensitivity_2_fit, function (y) {
-  
-  res <- lapply(y,function (x) {
-    
-    res <- c(c(plogis(summary(x)$cmat[1,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[2,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[3,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[4,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[5,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[6,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[7,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[8,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[9,1]),
-               plogis(summary(x)$cmat[1,1]+summary(x)$cmat[10,1])))
-    
-    cov.mat <- var(x$IC)
-    
-    gradient <- list(c(res[1]*(1-res[1]), 0, 0, 0, 0, 0, 0, 0, 0, 0),
-                     c(res[2]*(1-res[2]), res[2]*(1-res[2]), 0, 0, 0, 0, 0, 0, 0, 0),
-                     c(res[3]*(1-res[3]), 0, res[3]*(1-res[3]), 0, 0, 0, 0, 0, 0, 0),
-                     c(res[4]*(1-res[4]), 0, 0, res[4]*(1-res[4]), 0, 0, 0, 0, 0, 0),
-                     c(res[5]*(1-res[5]), 0, 0, 0, res[5]*(1-res[5]), 0, 0, 0, 0, 0),
-                     c(res[6]*(1-res[6]), 0, 0, 0, 0, res[6]*(1-res[6]), 0, 0, 0, 0),
-                     c(res[7]*(1-res[7]), 0, 0, 0, 0, 0, res[7]*(1-res[7]), 0, 0, 0),
-                     c(res[8]*(1-res[8]), 0, 0, 0, 0, 0, 0, res[8]*(1-res[8]), 0, 0),
-                     c(res[9]*(1-res[9]), 0, 0, 0, 0, 0, 0, 0, res[9]*(1-res[9]), 0),
-                     c(res[10]*(1-res[10]), 0, 0, 0, 0, 0, 0, 0, 0, res[10]*(1-res[10])))
-    
-    v <- do.call(rbind,lapply(gradient, function(x) {
-      v <- t(x) %*% cov.mat %*% x
-      std.dev <- sqrt(v[1, 1] / dim(ltmle_data)[1])*100
-    }))
-    
-    coef <- c(plogis(summary(x)$cmat[1,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[2,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[3,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[4,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[5,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[6,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[7,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[8,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[9,1])*100,
-              plogis(summary(x)$cmat[1,1]+summary(x)$cmat[10,1])*100)
-    
-    fin_res <- matrix(cbind(coef,v),nrow=10)
-    
-  })
-  
-})
+# 4.2. Combine into single list of results
+sensitivity_2_res <- list(s2_pcsa_res,s2_mcsa_res,
+                          s2_pf_res,s2_rp_res,s2_bp_res,s2_gh_res,
+                          s2_vt_res,s2_sf_res,s2_re_res,s2_mh_res)
 
 # 4.3. Pool MI results using Rubin's rules
 sensitivity_2_mi_res <- do.call(cbind,lapply(sensitivity_2_res, function (y) {

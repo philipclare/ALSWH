@@ -2,14 +2,14 @@
 ##   
 ## Effects of physical activity on health-related quality of life
 ## Finalise data after imputation and format for analysis
-## Date: 20 September 2022
+## Date: 30 September 2022
 ## OSF Registration: https://osf.io/6zkcw
 ##
 ######################################################################################
 # 1. Setup Environment
 #-------------------------------------------------------------------------------------
 
-workdir <- "Y:/PRJ-prc_alswh/Physical activity trajectories/"
+workdir <- "Y:/PRJ-prc_alswh/Paper 1 - Health-related quality of life/"
 
 libs <- c("plyr","dplyr","ltmle","gtools")
 missing <- !libs %in% installed.packages()
@@ -98,13 +98,8 @@ imp <- lapply(imp,function (x) {
 
   x[,seifa_list] <- lapply(x[,seifa_list], quantcut, q=3)
 
-  x <- subset(x, select = -c(activity_bin2,activity_bin_sens2,
-                             pcsa2,mcsa2,pf2,rp2,bp2,gh2,vt2,sf2,re2,mh2,
-                             pcsa3,mcsa3,pf3,rp3,bp3,gh3,vt3,sf3,re3,mh3,
-                             pcsa4,mcsa4,pf4,rp4,bp4,gh4,vt4,sf4,re4,mh4,
-                             pcsa5,mcsa5,pf5,rp5,bp5,gh5,vt5,sf5,re5,mh5,
-                             pcsa6,mcsa6,pf6,rp6,bp6,gh6,vt6,sf6,re6,mh6,
-                             pcsa7,mcsa7,pf7,rp7,bp7,gh7,vt7,sf7,re7,mh7,
+  x <- subset(x, select = -c(b_pcsa,b_mcsa,b_gh,b_pf,b_re,b_rp,b_bp,b_mh,b_vt,b_sf,
+                             activity_bin2,activity_bin_sens2,
                              marital8,age8,ariapgp8,employ8,seifadis8,live_u188,live_o188,
                              cancer_3yr8,arthritis_3yr8,depression_3yr8,anxiety_3yr8,
                              cesd108,mnstrs8,whobmigroup8,vegetables8,fruit8,alcliferisk8,alcepisrisk8,smokst8,

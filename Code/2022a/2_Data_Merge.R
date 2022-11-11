@@ -2,14 +2,14 @@
 ##   
 ## Effects of physical activity on health-related quality of life
 ## Merge data into combined, long-form data, ready for imputation
-## Date: 16 September 2022
+## Date: 29 September 2022
 ## OSF Registration: https://osf.io/6zkcw
 ##
 ######################################################################################
 # 1. Setup Environment
 #-------------------------------------------------------------------------------------
 
-workdir <- "Y:/PRJ-prc_alswh/Physical activity trajectories/"
+workdir <- "Y:/PRJ-prc_alswh/Paper 1 - Health-related quality of life/"
 
 libs <- c("haven","plyr","dplyr")
 missing <- !libs %in% installed.packages()
