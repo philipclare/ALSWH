@@ -2,63 +2,112 @@
 ##   
 ## Effects of physical activity on health-related quality of life
 ## Finalise data after imputation and format for analysis
-## Date: 20 September 2022
+## Date: 30 September 2022
 ## OSF Registration: https://osf.io/6zkcw
 ##
 ######################################################################################
 # 1. Setup Environment
 #-------------------------------------------------------------------------------------
 
-workdir <- "Y:/PRJ-prc_alswh/Physical activity trajectories/"
+# 1.1. Specify paths to Katana/windows PC paths based on whether NCPUS is detected
+if (Sys.getenv("NCPUS")!="") {
+  .libPaths("/home/z3312911/RPackages")
+  workdir <- "/home/z3312911/alswh/"
+} else { # Manually defined for PC
+  workdir <- "R:/PRJ-prc_alswh/Paper 1 - Health-related quality of life/"
+}
 
-libs <- c("plyr","dplyr","ltmle","gtools")
+# 1.2. Check libraries, install missing packages, update old packages, and then load required packages
+libs <- c("dplyr","fastDummies","gtools","ltmle")
 missing <- !libs %in% installed.packages()
 if (any(missing)) {
   install.packages(libs[missing])
 }
 lapply(libs, library, character.only = TRUE)
 
+seifa_list <- c("seifadis2","seifadis3","seifadis4","seifadis5","seifadis6","seifadis7")
+cens_list <- c("censored3","censored4","censored5","censored6","censored7","censored8","censored9")
+
 ######################################################################################
 # 2. Load imputed data
 #-------------------------------------------------------------------------------------
 
 load(file=paste0(workdir,"Data/imputed data - long form.RData"))
+imp <- imp[1:40]
 
 ######################################################################################
 # 3. Create computed/derived variables
 #-------------------------------------------------------------------------------------
 
 imp <- lapply(imp,function (x) {
+  
   x$alcliferisk <- ifelse(x$alcfq>10,1,0)
   x$alcepisrisk <- ifelse(x$alcbng>1,1,0)
   x$activity_bin <- ifelse(x$weighted_activity_time>=150,1,0)
-  x$activity_bin_sens <- ifelse(x$weighted_activity_time>=75,1,0)
+  x$activity_bin_sens1 <- ifelse(x$weighted_activity_time>=75,1,0)
+  x$activity_bin_sens2 <- ifelse(x$weighted_activity_time>=300,1,0)
   
-  x[,c("alcliferisk","alcepisrisk")] <- lapply(x[,c("alcliferisk","alcepisrisk")], factor, labels=c("No","Yes"))
-  x <- subset(x, select = -c(alcfq,alcbng,weighted_activity_time,inarea))
+  x <- subset(x, select = -c(alcfq,alcbng,weighted_activity_time,inarea,b_hypert_ever,hypert_3yr))
   x
+  
 })
 
 ######################################################################################
-# 4. Reshape to wide, drop unnecessary variables and structure for LTMLE
+# 4. Dummy code factors
 #-------------------------------------------------------------------------------------
 
-seifa_list <- c("seifadis2","seifadis3","seifadis4","seifadis5","seifadis6","seifadis7")
-cens_list <- c("censored3","censored4","censored5","censored6","censored7","censored8","censored9")
+imp <- lapply(imp,function (x) {
+  
+  
+  x[,c("b_cobcat","employ","live_u18","live_o18","heartdis_3yr","stroke_3yr",
+       "cancer_3yr","arthritis_3yr","depression_3yr","anxiety_3yr","vegetables","fruit")] <- lapply(x[,c("b_cobcat","employ","live_u18","live_o18","heartdis_3yr","stroke_3yr",
+                                                                                                         "cancer_3yr","arthritis_3yr","depression_3yr","anxiety_3yr","vegetables","fruit")], function (x) {as.numeric(x)-1})
+  
+  newcols <- c(length(x)+1,length(x)+2,length(x)+3,length(x)+4,length(x)+5,length(x)+6,length(x)+7,length(x)+9,length(x)+10,length(x)+11)
+  x <- dummy_cols(x, select_columns=c('b_educ','marital','ariapgp','whobmigroup','smokst'),remove_most_frequent_dummy=TRUE)
+  colnums <- match(c('b_educ','marital','ariapgp','whobmigroup','smokst') ,names(x))
+  x <- x[,c(1:(colnums[1]-1),newcols[1]:newcols[2],
+            (colnums[1]+1):(colnums[2]-1),newcols[3]:newcols[4],
+            (colnums[2]+1):(colnums[3]-1),newcols[5]:newcols[6],
+            (colnums[3]+1):(colnums[4]-1),newcols[7]:newcols[8],
+            (colnums[4]+1):(colnums[5]-1),newcols[9]:newcols[10],
+            (colnums[5]+1):(newcols[1]-1))]
+  
+  x <- x %>% 
+    dplyr::rename(
+      b_educ_2 = 'b_educ_Trade/apprentice/certificate/diploma',
+      b_educ_3 = 'b_educ_University',
+      marital_2 = 'marital_Separated/divorced/never married',
+      marital_3 = 'marital_Widowed',
+      ariapgp_2 = 'ariapgp_Major city',
+      ariapgp_3 = 'ariapgp_Remote',
+      whobmigroup_2 = 'whobmigroup_Obese',
+      whobmigroup_3 = 'whobmigroup_Overweight',
+      whobmigroup_4 = 'whobmigroup_Underweight',
+      smokst_2 = 'smokst_Current smoker',
+      smokst_3 = 'smokst_Ex smoker')
+  
+  x
+  
+})
+
+######################################################################################
+# 5. Reshape to wide, drop unnecessary variables and structure for LTMLE
+#-------------------------------------------------------------------------------------
 
 imp <- lapply(imp,function (x) {
+  
   x$censored <- 1
   
   x <- x[order(x$wave),]
   x <- reshape(x,
                timevar=c("wave"), 
                idvar=c("idproj"),
-               v.names=c("b_pcsa","b_mcsa","b_gh","b_pf","b_re","b_rp","b_cobcat","b_bp","b_educ","b_mh","b_vt","b_sf",
-                         "b_cancer_ever","b_depression_ever","b_anxiety_ever",
-                         "censored","activity_bin","activity_bin_sens","marital","age","ariapgp","employ","seifadis","live_u18","live_o18",
-                         "cancer_3yr","arthritis_3yr","depression_3yr","anxiety_3yr",
-                         "cesd10","mnstrs","whobmigroup","vegetables","fruit",
-                         "alcliferisk","alcepisrisk","smokst",
+               v.names=c(
+                         "censored","activity_bin","activity_bin_sens1","activity_bin_sens2","marital_2","marital_3","age","ariapgp_2","ariapgp_3","employ","seifadis","live_u18","live_o18",
+                         "heartdis_3yr","stroke_3yr","cancer_3yr","arthritis_3yr","depression_3yr","anxiety_3yr",
+                         "cesd10","mnstrs","whobmigroup_2","whobmigroup_3","whobmigroup_4","vegetables","fruit",
+                         "alcliferisk","alcepisrisk","smokst_2","smokst_3",
                          "pcsa","mcsa","pf","rp","bp","gh","vt","sf","re","mh"),
                sep = "",
                dir="wide")
@@ -70,77 +119,96 @@ imp <- lapply(imp,function (x) {
     y <- BinaryToCensoring(is.uncensored=y)
     })
   
-  x <- subset(x, select = -c(cancer_3yr2,arthritis_3yr2,depression_3yr2,anxiety_3yr2,
-                             b_pcsa3,b_mcsa3,b_gh3,b_pf3,b_re3,b_rp3,b_cobcat3,b_bp3,b_educ3,b_mh3,b_vt3,b_sf3,b_cancer_ever3,b_depression_ever3,b_anxiety_ever3,
-                             b_pcsa4,b_mcsa4,b_gh4,b_pf4,b_re4,b_rp4,b_cobcat4,b_bp4,b_educ4,b_mh4,b_vt4,b_sf4,b_cancer_ever4,b_depression_ever4,b_anxiety_ever4,
-                             b_pcsa5,b_mcsa5,b_gh5,b_pf5,b_re5,b_rp5,b_cobcat5,b_bp5,b_educ5,b_mh5,b_vt5,b_sf5,b_cancer_ever5,b_depression_ever5,b_anxiety_ever5,
-                             b_pcsa6,b_mcsa6,b_gh6,b_pf6,b_re6,b_rp6,b_cobcat6,b_bp6,b_educ6,b_mh6,b_vt6,b_sf6,b_cancer_ever6,b_depression_ever6,b_anxiety_ever6,
-                             b_pcsa7,b_mcsa7,b_gh7,b_pf7,b_re7,b_rp7,b_cobcat7,b_bp7,b_educ7,b_mh7,b_vt7,b_sf7,b_cancer_ever7,b_depression_ever7,b_anxiety_ever7,
-                             b_pcsa8,b_mcsa8,b_gh8,b_pf8,b_re8,b_rp8,b_cobcat8,b_bp8,b_educ8,b_mh8,b_vt8,b_sf8,b_cancer_ever8,b_depression_ever8,b_anxiety_ever8,
-                             b_pcsa9,b_mcsa9,b_gh9,b_pf9,b_re9,b_rp9,b_cobcat9,b_bp9,b_educ9,b_mh9,b_vt9,b_sf9,b_cancer_ever9,b_depression_ever9,b_anxiety_ever9))
-
-  x <- x %>%
-    rename(b_pcsa = b_pcsa2,
-           b_mcsa = b_mcsa2,
-           b_gh = b_gh2,
-           b_pf = b_pf2,
-           b_re = b_re2,
-           b_rp = b_rp2,
-           b_cobcat = b_cobcat2,
-           b_bp = b_bp2,
-           b_educ = b_educ2,
-           b_mh = b_mh2,
-           b_vt = b_vt2,
-           b_sf = b_sf2,
-           b_cancer_ever = b_cancer_ever2,
-           b_depression_ever = b_depression_ever2,
-           b_anxiety_ever = b_anxiety_ever2)
-
+  x <- subset(x, select = -c(heartdis_3yr2,stroke_3yr2,cancer_3yr2,arthritis_3yr2,depression_3yr2,anxiety_3yr2))
   x[,seifa_list] <- lapply(x[,seifa_list], quantcut, q=3)
+  x[,seifa_list] <- lapply(x[,seifa_list], function (y) {
+    levels(y) <- c("lowest","middle","highest")
+    y
+  })
 
-  x <- subset(x, select = -c(activity_bin2,activity_bin_sens2,
-                             pcsa2,mcsa2,pf2,rp2,bp2,gh2,vt2,sf2,re2,mh2,
-                             pcsa3,mcsa3,pf3,rp3,bp3,gh3,vt3,sf3,re3,mh3,
-                             pcsa4,mcsa4,pf4,rp4,bp4,gh4,vt4,sf4,re4,mh4,
-                             pcsa5,mcsa5,pf5,rp5,bp5,gh5,vt5,sf5,re5,mh5,
-                             pcsa6,mcsa6,pf6,rp6,bp6,gh6,vt6,sf6,re6,mh6,
-                             pcsa7,mcsa7,pf7,rp7,bp7,gh7,vt7,sf7,re7,mh7,
-                             marital8,age8,ariapgp8,employ8,seifadis8,live_u188,live_o188,
-                             cancer_3yr8,arthritis_3yr8,depression_3yr8,anxiety_3yr8,
-                             cesd108,mnstrs8,whobmigroup8,vegetables8,fruit8,alcliferisk8,alcepisrisk8,smokst8,
-                             pcsa8,mcsa8,pf8,rp8,bp8,gh8,vt8,sf8,re8,mh8,
-                             marital9,age9,ariapgp9,employ9,seifadis9,live_u189,live_o189,
-                             cancer_3yr9,arthritis_3yr9,depression_3yr9,anxiety_3yr9,
-                             cesd109,mnstrs9,whobmigroup9,vegetables9,fruit9,alcliferisk9,alcepisrisk9,smokst9,activity_bin9,activity_bin_sens9))
-  
-  x[,c("marital2","marital3","marital4","marital5","marital6","marital7")] <- lapply(x[,c("marital2","marital3","marital4","marital5","marital6","marital7")], factor)
-  x[,c("ariapgp2","ariapgp3","ariapgp4","ariapgp5","ariapgp6","ariapgp7")] <- lapply(x[,c("ariapgp2","ariapgp3","ariapgp4","ariapgp5","ariapgp6","ariapgp7")], factor)
-  x[,c("seifadis2","seifadis3","seifadis4","seifadis5","seifadis6","seifadis7")] <- lapply(x[,c("seifadis2","seifadis3","seifadis4","seifadis5","seifadis6","seifadis7")], factor)
-  x[,c("whobmigroup2","whobmigroup3","whobmigroup4","whobmigroup5","whobmigroup6","whobmigroup7")] <- lapply(x[,c("whobmigroup2","whobmigroup3","whobmigroup4","whobmigroup5","whobmigroup6","whobmigroup7")], factor)
-  x[,c("smokst2","smokst3","smokst4","smokst5","smokst6","smokst7")] <- lapply(x[,c("smokst2","smokst3","smokst4","smokst5","smokst6","smokst7")], factor)
+  colnums <- match(seifa_list ,names(x))
+  newcols <- c(length(x)+1,length(x)+2,length(x)+3,length(x)+4,length(x)+5,length(x)+6,length(x)+7,length(x)+8,length(x)+9,length(x)+10,length(x)+11,length(x)+12)
+  x <- dummy_cols(x, select_columns=seifa_list,ignore_na=TRUE,remove_first_dummy=TRUE)
+  x <- x[,c(1:(colnums[1]-1),newcols[1]:newcols[2],
+            (colnums[1]+1):(colnums[2]-1),newcols[3]:newcols[4],
+            (colnums[2]+1):(colnums[3]-1),newcols[5]:newcols[6],
+            (colnums[3]+1):(colnums[4]-1),newcols[7]:newcols[8],
+            (colnums[4]+1):(colnums[5]-1),newcols[9]:newcols[10],
+            (colnums[5]+1):(colnums[6]-1),newcols[11]:newcols[12],
+            (colnums[6]+1):(newcols[1]-1))]
 
-  x
-})
-
-imp_primary <- lapply(imp, function (x) {
-  subset(x, select=-c(activity_bin_sens3,activity_bin_sens4,activity_bin_sens5,activity_bin_sens6,activity_bin_sens7,activity_bin_sens8))
-})
-
-imp_sensitivity <- lapply(imp, function (x) {
-  x <- subset(x, select=-c(activity_bin3,activity_bin4,activity_bin5,activity_bin6,activity_bin7,activity_bin8))
   x <- x %>% 
-    rename(activity_bin3 = activity_bin_sens3,
-           activity_bin4 = activity_bin_sens4,
-           activity_bin5 = activity_bin_sens5,
-           activity_bin6 = activity_bin_sens6,
-           activity_bin7 = activity_bin_sens7,
-           activity_bin8 = activity_bin_sens8)
+    dplyr::rename(
+      seifadis_22 = 'seifadis2_middle',
+      seifadis_32 = 'seifadis2_highest',
+      seifadis_23 = 'seifadis3_middle',
+      seifadis_33 = 'seifadis3_highest',
+      seifadis_24 = 'seifadis4_middle',
+      seifadis_34 = 'seifadis4_highest',
+      seifadis_25 = 'seifadis5_middle',
+      seifadis_35 = 'seifadis5_highest',
+      seifadis_26 = 'seifadis6_middle',
+      seifadis_36 = 'seifadis6_highest',
+      seifadis_27 = 'seifadis7_middle',
+      seifadis_37 = 'seifadis7_highest')
+  
+  x <- subset(x, select = -c(b_pcsa,b_mcsa,b_gh,b_pf,b_re,b_rp,b_bp,b_mh,b_vt,b_sf,
+                             activity_bin2,activity_bin_sens12,activity_bin_sens22,
+                             marital_28,marital_38,age8,ariapgp_28,ariapgp_38,employ8,seifadis8,live_u188,live_o188,
+                             heartdis_3yr8,stroke_3yr8,cancer_3yr8,arthritis_3yr8,depression_3yr8,anxiety_3yr8,
+                             cesd108,mnstrs8,whobmigroup_28,whobmigroup_38,whobmigroup_48,vegetables8,fruit8,alcliferisk8,alcepisrisk8,smokst_28,smokst_38,
+                             pcsa8,mcsa8,pf8,rp8,bp8,gh8,vt8,sf8,re8,mh8,
+                             marital_29,marital_39,age9,ariapgp_29,ariapgp_39,employ9,seifadis9,live_u189,live_o189,
+                             heartdis_3yr9,stroke_3yr9,cancer_3yr9,arthritis_3yr9,depression_3yr9,anxiety_3yr9,
+                             cesd109,mnstrs9,whobmigroup_29,whobmigroup_39,whobmigroup_49,vegetables9,fruit9,alcliferisk9,alcepisrisk9,smokst_29,smokst_39,
+                             activity_bin9,activity_bin_sens19,activity_bin_sens29))
+   x
+
 })
 
 ######################################################################################
-# 5. Save final, analysis-ready dataset
+# 6. Create analysis-specific data for primary, s1, s2
 #-------------------------------------------------------------------------------------
 
-save(imp_primary,file=paste0(workdir,"Data/primary analysis data - wide form.RData"))
-save(imp_sensitivity,file=paste0(workdir,"Data/sensitivity analysis data - wide form.RData"))
+imp_primary <- lapply(imp, function (x) {
+  
+  subset(x, select=-c(activity_bin_sens13,activity_bin_sens14,activity_bin_sens15,activity_bin_sens16,activity_bin_sens17,activity_bin_sens18,
+                      activity_bin_sens23,activity_bin_sens24,activity_bin_sens25,activity_bin_sens26,activity_bin_sens27,activity_bin_sens28))
+  
+})
 
+imp_sensitivity_1 <- lapply(imp, function (x) {
+  
+  x <- subset(x, select=-c(activity_bin3,activity_bin4,activity_bin5,activity_bin6,activity_bin7,activity_bin8,
+                           activity_bin_sens23,activity_bin_sens24,activity_bin_sens25,activity_bin_sens26,activity_bin_sens27,activity_bin_sens28))
+  x <- x %>% 
+    rename(activity_bin3 = activity_bin_sens13,
+           activity_bin4 = activity_bin_sens14,
+           activity_bin5 = activity_bin_sens15,
+           activity_bin6 = activity_bin_sens16,
+           activity_bin7 = activity_bin_sens17,
+           activity_bin8 = activity_bin_sens18)
+  
+})
+
+imp_sensitivity_2 <- lapply(imp, function (x) {
+  
+  x <- subset(x, select=-c(activity_bin3,activity_bin4,activity_bin5,activity_bin6,activity_bin7,activity_bin8,
+                           activity_bin_sens13,activity_bin_sens14,activity_bin_sens15,activity_bin_sens16,activity_bin_sens17,activity_bin_sens18))
+  x <- x %>% 
+    rename(activity_bin3 = activity_bin_sens23,
+           activity_bin4 = activity_bin_sens24,
+           activity_bin5 = activity_bin_sens25,
+           activity_bin6 = activity_bin_sens26,
+           activity_bin7 = activity_bin_sens27,
+           activity_bin8 = activity_bin_sens28)
+  
+})
+
+######################################################################################
+# 7. Save final, analysis-ready dataset
+#-------------------------------------------------------------------------------------
+
+save(imp_primary,file=paste0(workdir,"Data/primary analysis data - wide form 20230605.RData"))
+save(imp_sensitivity_1,file=paste0(workdir,"Data/sensitivity analysis 1 data - wide form 20230605.RData"))
+save(imp_sensitivity_2,file=paste0(workdir,"Data/sensitivity analysis 2 data - wide form 20230605.RData"))
