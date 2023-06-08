@@ -16,7 +16,9 @@ capture program drop bchweight
 program bchweight, eclass properties(mi)
 local nclass="`1'"
 
-gsem (activity_bin3 activity_bin4 activity_bin5 activity_bin6 activity_bin7 activity_bin8 <- ), logit lclass(class `nclass') emopts(iterate(100)) listwise
+svyset [pweight=b_wtarea]
+
+svy: gsem (activity_bin3 activity_bin4 activity_bin5 activity_bin6 activity_bin7 activity_bin8 <- ), logit lclass(class `nclass') emopts(iterate(100)) listwise
 predict classpost*, classposteriorpr
 
 egen modclass = rowmax(classpost*)
@@ -28,10 +30,10 @@ forvalues i=1/`nclass' {
 matrix H=J(`nclass',`nclass',.)
 forvalues i=1/`nclass' {
 	forvalues j=1/`nclass' {
-		prop modclass
+		qui prop modclass
 		local m=_b[`i'.modclass]
 		gen temp=(((modclass==`i')*b_wtarea)*classpost`j')
-		su temp
+		qui su temp
 		matrix H[`i',`j']=r(mean)/`m'
 		drop temp
 	}

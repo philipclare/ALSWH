@@ -16,7 +16,9 @@ capture program drop mlregress
 program mlregress, eclass properties(mi)
 local nclass="`1'"
 
-gsem (activity_bin3 activity_bin4 activity_bin5 activity_bin6 activity_bin7 activity_bin8 <- ), logit lclass(class `nclass') emopts(iterate(20)) listwise
+svyset [pweight=b_wtarea]
+
+svy: gsem (activity_bin3 activity_bin4 activity_bin5 activity_bin6 activity_bin7 activity_bin8 <- ), logit lclass(class `nclass') emopts(iterate(20)) listwise
 predict classpost*, classposteriorpr
 
 matrix pmatrix = J(`nclass',`nclass',.)
@@ -64,7 +66,7 @@ local L_42=lq[4,2]
 local L_43=lq[4,3]
 local L_44=lq[4,4]
 
-capture noisily gsem ///
+capture svy: gsem ///
 (1: 2.modclass<-_cons@`L_12')(1: 3.modclass<-_cons@`L_13')(1: 4.modclass<-_cons@`L_14') ///
 (2: 2.modclass<-_cons@`L_22')(2: 3.modclass<-_cons@`L_23')(2: 4.modclass<-_cons@`L_24') ///
 (3: 2.modclass<-_cons@`L_32')(3: 3.modclass<-_cons@`L_33')(3: 4.modclass<-_cons@`L_34') ///
@@ -72,7 +74,7 @@ capture noisily gsem ///
 (CLASS <- i.b_alcliferisk i.b_alcepisrisk i.b_smokst ///
 c.b_pcsa c.b_mcsa ib2.b_bmigp c.b_cesd c.b_stress i.b_cancer_ever i.b_depression_ever i.b_anxiety_ever ///
 c.b_age c.b_seifadis i.b_marital i.b_ariapgp i.b_employ i.b_cobcat i.b_educ i.b_live_u18 i.b_live_o18) ///
-, vce(robust) lclass(CLASS `nclass') emopts(iterate(20))
+, lclass(CLASS `nclass') emopts(iterate(20))
 
 end
 
@@ -80,12 +82,12 @@ end
 // 2. Load data
 //----------------------------------------------------------------------------
 
-use "R:/PRJ-prc_alswh/Paper 0 - Latent Class Analysis/Data/primary analysis data.dta", clear
+use "Y:/PRJ-prc_alswh/Paper 0 - Latent Class Analysis/Data/primary analysis data.dta", clear
 
 /****************************************************************************/
 // 3. Run program via mi estimate to get mi regression estimates
 //----------------------------------------------------------------------------
 
-mi estimate, noisily: mlregress 4
+mi estimate, dots: mlregress 4
 
 log close

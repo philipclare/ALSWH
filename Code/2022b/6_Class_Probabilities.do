@@ -10,14 +10,16 @@
 // 1. Setup Environment and start log
 //----------------------------------------------------------------------------
 
-log using "Y:\PRJ-prc_alswh\Paper 0 - Latent Class Analysis\Results\class characteristics 20221005.smcl", replace
+log using "Y:/PRJ-prc_alswh/Paper 0 - Latent Class Analysis/Results/class characteristics 20221005.smcl", replace
 
 capture program drop lcmeans 
 program lcmeans, eclass properties(mi)
 local nclass="`1'"
 global m=$m+1
 
-qui gsem (activity_bin3 activity_bin4 activity_bin5 activity_bin6 activity_bin7 activity_bin8 <- ), logit lclass(class `nclass') nolog emopts(iterate(100)) listwise
+svyset [pweight=b_wtarea]
+
+qui svy: gsem (activity_bin3 activity_bin4 activity_bin5 activity_bin6 activity_bin7 activity_bin8 <- ), logit lclass(class `nclass') nolog emopts(iterate(100)) listwise
 predict classpost*, classposteriorpr
 qui estat lcmean
 
@@ -55,7 +57,7 @@ use "Y:/PRJ-prc_alswh/Paper 0 - Latent Class Analysis/Data/primary analysis data
 global m=0
 mi estimate, dots: lcmeans 4
 
-forvalues i=1/2 {
+forvalues i=1/20 {
 	matrix H`i'=H`i'[1,1..4],H`i'[2,1..4],H`i'[3,1..4],H`i'[4,1..4]
 }
 matrix H=H1\H2\H3\H4\H5\H6\H7\H8\H9\H10\H11\H12\H13\H14\H15\H16\H17\H18\H19\H20
