@@ -25,7 +25,7 @@ Code for all analysis in the article by Nguyen-duy et al 2023b.
 
 | Description | R Code |
 | --- | --- |
-| 1 - Data extraction - pull relevant variables from each wave | [Data extraction]](Code/2023b/1_Data_Extraction.R) |
+| 1 - Data extraction - pull relevant variables from each wave | [Data extraction](Code/2023b/1_Data_Extraction.R) |
 | 2 - Multiple imputation - impute intermittent missing data | [Imputation](Code/2023b/2_Multiple_Imputation.R) |
 | 3 - Final data creation - finalise imputed data and structure for analysis | [Finalise data](Code/2023b/3_Data_Finalise.R) |
 | 4 - Data import - import imputed data into Stata for analysis | [Stata import](Code/2023b/4_Data_Import.do) |
