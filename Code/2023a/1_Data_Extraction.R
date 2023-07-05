@@ -9,8 +9,15 @@
 # 1. Setup Environment
 #-------------------------------------------------------------------------------------
 
-workdir <- "Y:/PRJ-prc_alswh/"
+# 1.1. Specify paths to Katana/windows PC paths based on whether NCPUS is detected
+if (Sys.getenv("NCPUS")!="") {
+  .libPaths("/home/z3312911/RPackages")
+  workdir <- "/home/z3312911/alswh/"
+} else { # Manually defined for PC
+  workdir <- "R:/PRJ-prc_alswh/"
+}
 
+# 1.2. Check libraries, install missing packages, update old packages, and then load required packages
 libs <- c("haven","plyr","dplyr")
 missing <- !libs %in% installed.packages()
 if (any(missing)) {
