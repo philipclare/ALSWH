@@ -9,9 +9,15 @@
 # 1. Setup Environment
 #-------------------------------------------------------------------------------------
 
-.libPaths("/home/z3312911/RPackages")
-workdir <- "/home/z3312911/alswh/"
+# 1.1. Specify paths to Katana/windows PC paths based on whether NCPUS is detected
+if (Sys.getenv("NCPUS")!="") {
+  .libPaths("/home/z3312911/RPackages")
+  workdir <- "/home/z3312911/alswh/"
+} else { # Manually defined for PC
+  workdir <- "R:/PRJ-prc_alswh/Paper 1 - Health-related quality of life/"
+}
 
+# 1.2. Check libraries, install missing packages, update old packages, and then load required packages
 libs <- c("SuperLearner","glmnet","ranger","arm","ltmle","parallel")
 missing <- !libs %in% installed.packages()
 if (any(missing)) {
@@ -36,7 +42,7 @@ set.seed(seeds[args[1]])
 
 fit_ltmle <- function (x,outcome,cnodes,anodes,lnodes,qform,gform,sum.measures,msm.formula,SLlib) {
 
-  x <- x[,c(2:245,which(colnames(x)==outcome))]
+  x <- x[,c(2:match("censored9" ,names(x)),which(colnames(x)==outcome))]
   
   ynodes <- outcome
   names(qform)[6] <- outcome
@@ -208,14 +214,14 @@ anodes <- c("activity_bin3","activity_bin4","activity_bin5","activity_bin6","act
 colnums <- match(c('marital_22','mh2','marital_23','mh3','marital_24','mh4','marital_25','mh5','marital_26','mh6','marital_27','mh7') ,names(ltmle_data[[1]]))
 lnodes <- colnames(ltmle_data[[1]][,c((colnums[1]):(colnums[2]),(colnums[3]):(colnums[4]),(colnums[5]):(colnums[6]),(colnums[7]):(colnums[8]),(colnums[9]):(colnums[10]),(colnums[11]):(colnums[12]))])
 
-q_base <- "Q.kplus1 ~ b_wtarea + b_cobcat + b_educ_2 + b_educ_3 + b_heartdis_ever + b_hypert_ever + b_stroke_ever + b_cancer_ever + b_depression_ever + b_anxiety_ever"
-g_base <- "b_cobcat + b_educ_2 + b_educ_3 + b_heartdis_ever + b_hypert_ever + b_stroke_ever + b_cancer_ever + b_depression_ever + b_anxiety_ever"
+q_base <- "Q.kplus1 ~ b_wtarea + b_cobcat + b_educ_2 + b_educ_3 + b_heartdis_ever + b_stroke_ever + b_cancer_ever + b_depression_ever + b_anxiety_ever"
+g_base <- "b_cobcat + b_educ_2 + b_educ_3 + b_heartdis_ever + b_stroke_ever + b_cancer_ever + b_depression_ever + b_anxiety_ever"
 w2_conf <- "marital_22 + marital_32 + age2 + ariapgp_22 + ariapgp_32 + employ2 + seifadis_22 + seifadis_32 + live_u182 + live_o182 + cesd102 + mnstrs2 + whobmigroup_22 + whobmigroup_32 + whobmigroup_42 + vegetables2 + fruit2 + alcliferisk2 + alcepisrisk2 + smokst_22 + smokst_32 + pcsa2 + mcsa2 + gh2 + pf2 + re2 + rp2 + bp2 + mh2 + vt2 + sf2"
-w3_conf <- "marital_23 + marital_33 + age3 + ariapgp_23 + ariapgp_33 + employ3 + seifadis_23 + seifadis_33 + live_u183 + live_o183 + heartdis_3yr3 + hypert_3yr3 + stroke_3yr3 + cancer_3yr3 + arthritis_3yr3 + depression_3yr3 + anxiety_3yr3 + cesd103 + mnstrs3 + whobmigroup_23 + whobmigroup_33 + whobmigroup_43 + vegetables3 + fruit3 + alcliferisk3 + alcepisrisk3 + smokst_23 + smokst_33 + pcsa3 + mcsa3 + gh3 + pf3 + re3 + rp3 + bp3 + mh3 + vt3 + sf3"
-w4_conf <- "marital_24 + marital_34 + age4 + ariapgp_24 + ariapgp_34 + employ4 + seifadis_24 + seifadis_34 + live_u184 + live_o184 + heartdis_3yr4 + hypert_3yr4 + stroke_3yr4 + cancer_3yr4 + arthritis_3yr4 + depression_3yr4 + anxiety_3yr4 + cesd104 + mnstrs4 + whobmigroup_24 + whobmigroup_34 + whobmigroup_44 + vegetables4 + fruit4 + alcliferisk4 + alcepisrisk4 + smokst_24 + smokst_34 + pcsa4 + mcsa4 + gh4 + pf4 + re4 + rp4 + bp4 + mh4 + vt4 + sf4"
-w5_conf <- "marital_25 + marital_35 + age5 + ariapgp_25 + ariapgp_35 + employ5 + seifadis_25 + seifadis_35 + live_u185 + live_o185 + heartdis_3yr5 + hypert_3yr5 + stroke_3yr5 + cancer_3yr5 + arthritis_3yr5 + depression_3yr5 + anxiety_3yr5 + cesd105 + mnstrs5 + whobmigroup_25 + whobmigroup_35 + whobmigroup_45 + vegetables5 + fruit5 + alcliferisk5 + alcepisrisk5 + smokst_25 + smokst_35 + pcsa5 + mcsa5 + gh5 + pf5 + re5 + rp5 + bp5 + mh5 + vt5 + sf5"
-w6_conf <- "marital_26 + marital_36 + age6 + ariapgp_26 + ariapgp_36 + employ6 + seifadis_26 + seifadis_36 + live_u186 + live_o186 + heartdis_3yr6 + hypert_3yr6 + stroke_3yr6 + cancer_3yr6 + arthritis_3yr6 + depression_3yr6 + anxiety_3yr6 + cesd106 + mnstrs6 + whobmigroup_26 + whobmigroup_36 + whobmigroup_46 + vegetables6 + fruit6 + alcliferisk6 + alcepisrisk6 + smokst_26 + smokst_36 + pcsa6 + mcsa6 + gh6 + pf6 + re6 + rp6 + bp6 + mh6 + vt6 + sf6"
-w7_conf <- "marital_27 + marital_37 + age7 + ariapgp_27 + ariapgp_37 + employ7 + seifadis_27 + seifadis_37 + live_u187 + live_o187 + heartdis_3yr7 + hypert_3yr7 + stroke_3yr7 + cancer_3yr7 + arthritis_3yr7 + depression_3yr7 + anxiety_3yr7 + cesd107 + mnstrs7 + whobmigroup_27 + whobmigroup_37 + whobmigroup_47 + vegetables7 + fruit7 + alcliferisk7 + alcepisrisk7 + smokst_27 + smokst_37 + pcsa7 + mcsa7 + gh7 + pf7 + re7 + rp7 + bp7 + mh7 + vt7 + sf7"
+w3_conf <- "marital_23 + marital_33 + age3 + ariapgp_23 + ariapgp_33 + employ3 + seifadis_23 + seifadis_33 + live_u183 + live_o183 + heartdis_3yr3 + stroke_3yr3 + cancer_3yr3 + arthritis_3yr3 + depression_3yr3 + anxiety_3yr3 + cesd103 + mnstrs3 + whobmigroup_23 + whobmigroup_33 + whobmigroup_43 + vegetables3 + fruit3 + alcliferisk3 + alcepisrisk3 + smokst_23 + smokst_33 + pcsa3 + mcsa3 + gh3 + pf3 + re3 + rp3 + bp3 + mh3 + vt3 + sf3"
+w4_conf <- "marital_24 + marital_34 + age4 + ariapgp_24 + ariapgp_34 + employ4 + seifadis_24 + seifadis_34 + live_u184 + live_o184 + heartdis_3yr4 + stroke_3yr4 + cancer_3yr4 + arthritis_3yr4 + depression_3yr4 + anxiety_3yr4 + cesd104 + mnstrs4 + whobmigroup_24 + whobmigroup_34 + whobmigroup_44 + vegetables4 + fruit4 + alcliferisk4 + alcepisrisk4 + smokst_24 + smokst_34 + pcsa4 + mcsa4 + gh4 + pf4 + re4 + rp4 + bp4 + mh4 + vt4 + sf4"
+w5_conf <- "marital_25 + marital_35 + age5 + ariapgp_25 + ariapgp_35 + employ5 + seifadis_25 + seifadis_35 + live_u185 + live_o185 + heartdis_3yr5 + stroke_3yr5 + cancer_3yr5 + arthritis_3yr5 + depression_3yr5 + anxiety_3yr5 + cesd105 + mnstrs5 + whobmigroup_25 + whobmigroup_35 + whobmigroup_45 + vegetables5 + fruit5 + alcliferisk5 + alcepisrisk5 + smokst_25 + smokst_35 + pcsa5 + mcsa5 + gh5 + pf5 + re5 + rp5 + bp5 + mh5 + vt5 + sf5"
+w6_conf <- "marital_26 + marital_36 + age6 + ariapgp_26 + ariapgp_36 + employ6 + seifadis_26 + seifadis_36 + live_u186 + live_o186 + heartdis_3yr6 + stroke_3yr6 + cancer_3yr6 + arthritis_3yr6 + depression_3yr6 + anxiety_3yr6 + cesd106 + mnstrs6 + whobmigroup_26 + whobmigroup_36 + whobmigroup_46 + vegetables6 + fruit6 + alcliferisk6 + alcepisrisk6 + smokst_26 + smokst_36 + pcsa6 + mcsa6 + gh6 + pf6 + re6 + rp6 + bp6 + mh6 + vt6 + sf6"
+w7_conf <- "marital_27 + marital_37 + age7 + ariapgp_27 + ariapgp_37 + employ7 + seifadis_27 + seifadis_37 + live_u187 + live_o187 + heartdis_3yr7 + stroke_3yr7 + cancer_3yr7 + arthritis_3yr7 + depression_3yr7 + anxiety_3yr7 + cesd107 + mnstrs7 + whobmigroup_27 + whobmigroup_37 + whobmigroup_47 + vegetables7 + fruit7 + alcliferisk7 + alcepisrisk7 + smokst_27 + smokst_37 + pcsa7 + mcsa7 + gh7 + pf7 + re7 + rp7 + bp7 + mh7 + vt7 + sf7"
 
 q3_form <- paste(q_base,                        w2_conf,sep=" + ")
 q4_form <- paste(q_base,w2_conf,"activity_bin3",w3_conf,sep=" + ")

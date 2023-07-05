@@ -9,8 +9,15 @@
 # 1. Setup Environment
 #-------------------------------------------------------------------------------------
 
-workdir <- "Y:/PRJ-prc_alswh/Paper 1 - Health-related quality of life/"
+# 1.1. Specify paths to Katana/windows PC paths based on whether NCPUS is detected
+if (Sys.getenv("NCPUS")!="") {
+  .libPaths("/home/z3312911/RPackages")
+  workdir <- "/home/z3312911/alswh/"
+} else { # Manually defined for PC
+  workdir <- "R:/PRJ-prc_alswh/Paper 1 - Health-related quality of life/"
+}
 
+# 1.2. Check libraries, install missing packages, update old packages, and then load required packages
 libs <- c("dplyr","fastDummies","gtools","ltmle")
 missing <- !libs %in% installed.packages()
 if (any(missing)) {
@@ -26,6 +33,7 @@ cens_list <- c("censored3","censored4","censored5","censored6","censored7","cens
 #-------------------------------------------------------------------------------------
 
 load(file=paste0(workdir,"Data/imputed data - long form.RData"))
+imp <- imp[1:40]
 
 ######################################################################################
 # 3. Create computed/derived variables
@@ -39,7 +47,7 @@ imp <- lapply(imp,function (x) {
   x$activity_bin_sens1 <- ifelse(x$weighted_activity_time>=75,1,0)
   x$activity_bin_sens2 <- ifelse(x$weighted_activity_time>=300,1,0)
   
-  x <- subset(x, select = -c(alcfq,alcbng,weighted_activity_time,inarea))
+  x <- subset(x, select = -c(alcfq,alcbng,weighted_activity_time,inarea,b_hypert_ever,hypert_3yr))
   x
   
 })
@@ -50,13 +58,20 @@ imp <- lapply(imp,function (x) {
 
 imp <- lapply(imp,function (x) {
   
-  x[,c("b_cobcat","employ","live_u18","live_o18","heartdis_3yr","hypert_3yr","stroke_3yr",
-       "cancer_3yr","arthritis_3yr","depression_3yr","anxiety_3yr","vegetables","fruit")] <- lapply(x[,c("b_cobcat","employ","live_u18","live_o18","heartdis_3yr","hypert_3yr","stroke_3yr",
+  
+  x[,c("b_cobcat","employ","live_u18","live_o18","heartdis_3yr","stroke_3yr",
+       "cancer_3yr","arthritis_3yr","depression_3yr","anxiety_3yr","vegetables","fruit")] <- lapply(x[,c("b_cobcat","employ","live_u18","live_o18","heartdis_3yr","stroke_3yr",
                                                                                                          "cancer_3yr","arthritis_3yr","depression_3yr","anxiety_3yr","vegetables","fruit")], function (x) {as.numeric(x)-1})
   
+  newcols <- c(length(x)+1,length(x)+2,length(x)+3,length(x)+4,length(x)+5,length(x)+6,length(x)+7,length(x)+9,length(x)+10,length(x)+11)
   x <- dummy_cols(x, select_columns=c('b_educ','marital','ariapgp','whobmigroup','smokst'),remove_most_frequent_dummy=TRUE)
   colnums <- match(c('b_educ','marital','ariapgp','whobmigroup','smokst') ,names(x))
-  x <- x[,c(1:(colnums[1]-1),58:59,(colnums[1]+1):(colnums[2]-1),60:61,(colnums[2]+1):(colnums[3]-1),62:63,(colnums[3]+1):(colnums[4]-1),64:66,(colnums[4]+1):(colnums[5]-1),67:68,(colnums[5]+1):57)]
+  x <- x[,c(1:(colnums[1]-1),newcols[1]:newcols[2],
+            (colnums[1]+1):(colnums[2]-1),newcols[3]:newcols[4],
+            (colnums[2]+1):(colnums[3]-1),newcols[5]:newcols[6],
+            (colnums[3]+1):(colnums[4]-1),newcols[7]:newcols[8],
+            (colnums[4]+1):(colnums[5]-1),newcols[9]:newcols[10],
+            (colnums[5]+1):(newcols[1]-1))]
   
   x <- x %>% 
     dplyr::rename(
@@ -90,7 +105,7 @@ imp <- lapply(imp,function (x) {
                idvar=c("idproj"),
                v.names=c(
                          "censored","activity_bin","activity_bin_sens1","activity_bin_sens2","marital_2","marital_3","age","ariapgp_2","ariapgp_3","employ","seifadis","live_u18","live_o18",
-                         "heartdis_3yr","hypert_3yr","stroke_3yr","cancer_3yr","arthritis_3yr","depression_3yr","anxiety_3yr",
+                         "heartdis_3yr","stroke_3yr","cancer_3yr","arthritis_3yr","depression_3yr","anxiety_3yr",
                          "cesd10","mnstrs","whobmigroup_2","whobmigroup_3","whobmigroup_4","vegetables","fruit",
                          "alcliferisk","alcepisrisk","smokst_2","smokst_3",
                          "pcsa","mcsa","pf","rp","bp","gh","vt","sf","re","mh"),
@@ -104,16 +119,23 @@ imp <- lapply(imp,function (x) {
     y <- BinaryToCensoring(is.uncensored=y)
     })
   
-  x <- subset(x, select = -c(heartdis_3yr2,hypert_3yr2,stroke_3yr2,cancer_3yr2,arthritis_3yr2,depression_3yr2,anxiety_3yr2))
+  x <- subset(x, select = -c(heartdis_3yr2,stroke_3yr2,cancer_3yr2,arthritis_3yr2,depression_3yr2,anxiety_3yr2))
   x[,seifa_list] <- lapply(x[,seifa_list], quantcut, q=3)
   x[,seifa_list] <- lapply(x[,seifa_list], function (y) {
     levels(y) <- c("lowest","middle","highest")
     y
   })
 
-  x <- dummy_cols(x, select_columns=seifa_list,ignore_na=TRUE,remove_first_dummy=TRUE)
   colnums <- match(seifa_list ,names(x))
-  x <- x[,c(1:(colnums[1]-1),342:343,(colnums[1]+1):(colnums[2]-1),344:345,(colnums[2]+1):(colnums[3]-1),346:347,(colnums[3]+1):(colnums[4]-1),348:349,(colnums[4]+1):(colnums[5]-1),350:351,(colnums[5]+1):(colnums[6]-1),352:353,(colnums[6]+1):341)]
+  newcols <- c(length(x)+1,length(x)+2,length(x)+3,length(x)+4,length(x)+5,length(x)+6,length(x)+7,length(x)+8,length(x)+9,length(x)+10,length(x)+11,length(x)+12)
+  x <- dummy_cols(x, select_columns=seifa_list,ignore_na=TRUE,remove_first_dummy=TRUE)
+  x <- x[,c(1:(colnums[1]-1),newcols[1]:newcols[2],
+            (colnums[1]+1):(colnums[2]-1),newcols[3]:newcols[4],
+            (colnums[2]+1):(colnums[3]-1),newcols[5]:newcols[6],
+            (colnums[3]+1):(colnums[4]-1),newcols[7]:newcols[8],
+            (colnums[4]+1):(colnums[5]-1),newcols[9]:newcols[10],
+            (colnums[5]+1):(colnums[6]-1),newcols[11]:newcols[12],
+            (colnums[6]+1):(newcols[1]-1))]
 
   x <- x %>% 
     dplyr::rename(
@@ -133,11 +155,11 @@ imp <- lapply(imp,function (x) {
   x <- subset(x, select = -c(b_pcsa,b_mcsa,b_gh,b_pf,b_re,b_rp,b_bp,b_mh,b_vt,b_sf,
                              activity_bin2,activity_bin_sens12,activity_bin_sens22,
                              marital_28,marital_38,age8,ariapgp_28,ariapgp_38,employ8,seifadis8,live_u188,live_o188,
-                             heartdis_3yr8,hypert_3yr8,stroke_3yr8,cancer_3yr8,arthritis_3yr8,depression_3yr8,anxiety_3yr8,
+                             heartdis_3yr8,stroke_3yr8,cancer_3yr8,arthritis_3yr8,depression_3yr8,anxiety_3yr8,
                              cesd108,mnstrs8,whobmigroup_28,whobmigroup_38,whobmigroup_48,vegetables8,fruit8,alcliferisk8,alcepisrisk8,smokst_28,smokst_38,
                              pcsa8,mcsa8,pf8,rp8,bp8,gh8,vt8,sf8,re8,mh8,
                              marital_29,marital_39,age9,ariapgp_29,ariapgp_39,employ9,seifadis9,live_u189,live_o189,
-                             heartdis_3yr9,hypert_3yr9,stroke_3yr9,cancer_3yr9,arthritis_3yr9,depression_3yr9,anxiety_3yr9,
+                             heartdis_3yr9,stroke_3yr9,cancer_3yr9,arthritis_3yr9,depression_3yr9,anxiety_3yr9,
                              cesd109,mnstrs9,whobmigroup_29,whobmigroup_39,whobmigroup_49,vegetables9,fruit9,alcliferisk9,alcepisrisk9,smokst_29,smokst_39,
                              activity_bin9,activity_bin_sens19,activity_bin_sens29))
    x
@@ -183,16 +205,10 @@ imp_sensitivity_2 <- lapply(imp, function (x) {
   
 })
 
-raw_data <- imp_primary[[41]]
-imp_primary <- imp_primary[1:40]
-imp_sensitivity_1 <- imp_sensitivity_1[1:40]
-imp_sensitivity_2 <- imp_sensitivity_2[1:40]
-
 ######################################################################################
 # 7. Save final, analysis-ready dataset
 #-------------------------------------------------------------------------------------
 
-save(raw_data,file=paste0(workdir,"Data/raw data for table 1 - wide form 20230605.RData"))
 save(imp_primary,file=paste0(workdir,"Data/primary analysis data - wide form 20230605.RData"))
 save(imp_sensitivity_1,file=paste0(workdir,"Data/sensitivity analysis 1 data - wide form 20230605.RData"))
 save(imp_sensitivity_2,file=paste0(workdir,"Data/sensitivity analysis 2 data - wide form 20230605.RData"))

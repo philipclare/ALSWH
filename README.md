@@ -16,9 +16,9 @@ Code for all analysis in the article by Nguyen-duy et al 2023a.
 | 7 - Sensitivty analysis excluding variables wholly missing in some waves. | [Sensitivity 1](Code/2023a/7_Dynamic_Regimes_Sensitivity2.R) |
 | 8 - Pool results across imputations and create analysis figures | [Pool results](Code/2023a/8_Pool_Results.R) |
 | 9 - Create plots to graphically report the analysis findings | [Create plots](Code/2023a/9_Create_Plots.R) |
-| 10 - Create plots to graphically report the analysis findings | [Create plots](Code/2023a/9_Create_Plots.R) |
-| 11 - Create descriptive tables for article | [Descriptives](Code/2023a/10_Descriptive_Statistics.R) |
-| 12 - E-value analysis to test sensitivity to unmeasured confounding | [E-value analysis](Code/2023a/12_EValue_Analysis.R) |
+| 10 - Create descriptive tables for article | [Descriptives](Code/2023a/10_Descriptive_Statistics.R) |
+| 11 - E-value analysis to test sensitivity to unmeasured confoundin | [E-value analysis](Code/2023a/11_EValue_Analysis.R) |
+| 12 - Create summary of missing data | [Missing data](Code/2023a/12_Missing_data_summary.R) |
 
 ## Physical activity trajectories and associations with health-related quality of life
 Code for all analysis in the article by Nguyen-duy et al 2023b.

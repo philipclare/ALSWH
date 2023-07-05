@@ -1,24 +1,17 @@
 ######################################################################################
 ##   
-## Effects of physical activity on health-related quality of life
+## Effects of physical activity on mortality
 ## Extract key variables from separate wave datasets
-## Date: 29 September 2022
-## OSF Registration: https://osf.io/6zkcw
+## Date: 25 November 2022
+## OSF Registration: https://osf.io/pytzx
 ##
 ######################################################################################
 # 1. Setup Environment
 #-------------------------------------------------------------------------------------
 
-# 1.1. Specify paths to Katana/windows PC paths based on whether NCPUS is detected
-if (Sys.getenv("NCPUS")!="") {
-  .libPaths("/home/z3312911/RPackages")
-  workdir <- "/home/z3312911/alswh/"
-} else { # Manually defined for PC
-  workdir <- "R:/PRJ-prc_alswh/"
-}
+workdir <- "//surefsn025/ProfileR025$/philipclare/Documents/ALSWH/"
 
-# 1.2. Check libraries, install missing packages, update old packages, and then load required packages
-libs <- c("haven","plyr","dplyr")
+libs <- c("haven","plyr","dplyr","tidyr")
 missing <- !libs %in% installed.packages()
 if (any(missing)) {
   install.packages(libs[missing])
@@ -59,7 +52,7 @@ w1data <- w1data %>% mutate(b_cobcat = recode(b_cobcat,
                                             `5` = 1))
 w1data$b_cobcat <- factor(w1data$b_cobcat,labels=c("Australia","Other"))
 
-save(w1data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w1 pa.RData"))
+save(w1data,file=paste0(workdir,"/Data/w1 pa.RData"))
 
 ######################################################################################
 # 3. Wave 2 Data
@@ -72,9 +65,9 @@ w2data <- zap_formats(w2data)
 
 names(w2data) <- tolower(names(w2data))
 w2data <- subset(w2data, select = c(idproj,
-                                    m2age,m2q54mn,m2q54sc,m2ariapgp,m2i_disad,m2marital,m2whobmigroup,m2q74b,m2q74c,
-                                    m2q74d,m2smokst,m2q39,m2q40,m2q41,m2mnstrs,m2cesd10,m2pf,m2mh,m2gh,m2re,m2rp,m2sf,m2bp,m2vt,
-                                    m2q20c,m2q20d,m2q20e,m2q20k,m2q20l,m2q20m,m2q20n,m2q20o,m2q20p,m2q20q,m2pcsa,m2mcsa))
+                                      m2age,m2q54mn,m2q54sc,m2ariapgp,m2i_disad,m2marital,m2whobmigroup,m2q74b,m2q74c,
+                                      m2q74d,m2smokst,m2q39,m2q40,m2q41,m2mnstrs,m2cesd10,m2pf,m2mh,m2gh,m2re,m2rp,m2sf,m2bp,m2vt,
+                                      m2q20k,m2q20l,m2q20m,m2q20n,m2q20o,m2q20p,m2q20q,m2pcsa,m2mcsa))
 w2data$wave <- 2
 
 w2data <- w2data %>% 
@@ -82,12 +75,6 @@ w2data <- w2data %>%
 w2data <- w2data %>% 
   rename(seifadis = i_disad)
 
-w2data$b_heartdis_ever <- ifelse(w2data$q20c>=1,
-                            1,0)
-w2data$b_hypert_ever <- ifelse(w2data$q20d>=1,
-                            1,0)
-w2data$b_stroke_ever <- ifelse(w2data$q20e>=1,
-                            1,0)
 w2data$b_cancer_ever <- ifelse(w2data$q20k>=1 | w2data$q20k>=1 | w2data$q20k>=1 | w2data$q20k>=1 | w2data$q20o>=1,
                             1,0)
 w2data$b_depression_ever <- ifelse(w2data$q20p>=1,
@@ -124,13 +111,14 @@ w2data <- w2data %>% mutate(alcqnt = recode(alcqnt,
                                             `3` = 6.5,
                                             `4` = 9))
 
-w2data <- subset(w2data, select = -c(q20c,q20d,q20e,q20k,q20l,q20m,q20n,q20o,q20p,q20q,q54mn,q54sc,q74b,q74c,q74d))
+w2data <- subset(w2data, select = -c(q20k,q20l,q20m,q20n,q20o,q20p,q20q,q54mn,q54sc,q74b,q74c,q74d))
+w2datat <- subset(w2data, select = c(idproj,age,ariapgp,seifadis,marital,whobmigroup,smokst,alcfre,alcqnt,alcbng,
+                                     mnstrs,cesd10,pf,mh,gh,re,rp,sf,bp,vt,pcsa,mcsa,wave,employ,live_u18,live_o18))
+w2datab <- subset(w2data, select = c(idproj,b_cancer_ever,b_depression_ever,b_anxiety_ever))
 
-w2datab <- subset(w2data, select = c(idproj,b_heartdis_ever,b_hypert_ever,b_stroke_ever,b_cancer_ever,b_depression_ever,b_anxiety_ever))
-w2datat <- subset(w2data, select = -c(b_heartdis_ever,b_hypert_ever,b_stroke_ever,b_cancer_ever,b_depression_ever,b_anxiety_ever))
 
-save(w2datab,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w2b pa.RData"))
-save(w2datat,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w2t pa.RData"))
+save(w2datat,file=paste0(workdir,"/Data/w2t pa.RData"))
+save(w2datab,file=paste0(workdir,"/Data/w2b pa.RData"))
 
 ######################################################################################
 # 4. Wave 3 Data
@@ -146,20 +134,14 @@ w3data <- subset(w3data, select = c(idproj,
                                     m3age,m3q71a,m3q71b,m3q71c,m3q71e,m3ariapgp,m3i_disad,m3marital,m3whobmigroup,m3q90c,m3q90d,
                                     m3q90e,m3smokst,m3mnstrs,m3cesd10,m3q69ah,m3q69am,m3q69bh,m3q69bm,m3q69ch,m3q69cm,m3q69dh,m3q69dm,
                                     m3pf,m3mh,m3gh,m3re,m3rp,m3sf,m3bp,m3vt,m3pcsa,m3mcsa,
-                                    m3q35a,m3q35e,m3q35f,m3q35g,m3q35m,m3q35n,m3q35o,m3q35p,m3q35q,m3q35r,m3q35y))
+                                    m3q35a,m3q35m,m3q35n,m3q35o,m3q35p,m3q35q,m3q35r,m3q35y))
 w3data$wave <- 3
 w3data <- w3data %>% 
   rename_all(~stringr::str_replace(.,"^m3",""))
 
 w3data <- w3data %>% 
   rename(seifadis = i_disad)
-
-w3data$heartdis_3yr <- ifelse(w3data$q35e>=1,
-                                 1,0)
-w3data$hypert_3yr <- ifelse(w3data$q35f>=1,
-                               1,0)
-w3data$stroke_3yr <- ifelse(w3data$q35g>=1,
-                               1,0)  
+         
 w3data$cancer_3yr <- ifelse(w3data$q35m==1 | w3data$q35n==1 | w3data$q35o==1 | w3data$q35p==1,
                             1,0)
 w3data <- w3data %>% 
@@ -167,7 +149,7 @@ w3data <- w3data %>%
          anxiety_3yr = q35r,
          arthritis_3yr = q35a)
 
-w3data$employ <- ifelse(w3data$q71a>1 | w3data$q71b>1 | w3data$q71c>1 | w3data$q71e>1,
+w3data$employ <- ifelse(w3data$q71a>1 | w3data$q71b>1 & w3data$q71c>1 | w3data$q71e>1,
                         1,0)
 w3data$employ <- factor(w3data$employ,labels=c("Not employed","Employed"))
 
@@ -181,12 +163,12 @@ w3data$moderate_time <- w3data$q69bh*60 + w3data$q69bm
 w3data$vig_leis_time <- w3data$q69ch*60 + w3data$q69cm
 w3data$vig_hous_time <- w3data$q69dh*60 + w3data$q69dm
 
-w3data <- subset(w3data, select = -c(q35e,q35f,q35g,q35m,q35n,q35o,q35p,q35y,
+w3data <- subset(w3data, select = -c(q35m,q35n,q35o,q35p,q35y,
                                      q69ah,q69am,q69bh,q69bm,q69ch,q69cm,q69dh,q69dm,
                                      q71a,q71b,q71c,q71e,
                                      q90c,q90d,q90e))
 
-save(w3data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w3 pa.RData"))
+save(w3data,file=paste0(workdir,"/Data/w3 pa.RData"))
 
 ######################################################################################
 # 5. Wave 4 Data
@@ -202,17 +184,11 @@ w4data <- subset(w4data, select = c(idproj,
                                     m4age,m4q68a,m4q68c,m4ariapgp,m4seifadis,m4marital,m4whobmigroup,m4q89c,m4q89d,m4q89e,m4q63,m4q62,
                                     m4smokst,m4q59,m4q60,m4q61,m4mnstrs,m4cesd10,m4q67ah,m4q67am,m4q67bh,m4q67bm,m4q67ch,m4q67cm,m4q67dh,m4q67dm,
                                     m4pf,m4mh,m4gh,m4re,m4rp,m4sf,m4bp,m4vt,m4pcsa,m4mcsa,
-                                    m4q32a,m4q32d,m4q32e,m4q32f,m4q32l,m4q32m,m4q32n,m4q32o,m4q32p,m4q32q,m4q32r,m4q32w))
+                                    m4q32a,m4q32l,m4q32m,m4q32n,m4q32o,m4q32p,m4q32q,m4q32r,m4q32w))
 w4data$wave <- 4
 w4data <- w4data %>% 
   rename_all(~stringr::str_replace(.,"^m4",""))
 
-w4data$heartdis_3yr <- ifelse(w4data$q32d>=1,
-                              1,0)
-w4data$hypert_3yr <- ifelse(w4data$q32e>=1,
-                            1,0)
-w4data$stroke_3yr <- ifelse(w4data$q32f>=1,
-                            1,0)  
 w4data$cancer_3yr <- ifelse(w4data$q32l==1 | w4data$q32m==1 | w4data$q32n==1 | w4data$q32o==1 | w4data$q32p==1,
                             1,0)
 w4data <- w4data %>% 
@@ -270,12 +246,12 @@ w4data$moderate_time <- w4data$q67bh*60 + w4data$q67bm
 w4data$vig_leis_time <- w4data$q67ch*60 + w4data$q67cm
 w4data$vig_hous_time <- w4data$q67dh*60 + w4data$q67dm
 
-w4data <- subset(w4data, select = -c(q32d,q32e,q32f,q32l,q32m,q32n,q32o,q32p,q32w,
+w4data <- subset(w4data, select = -c(q32l,q32m,q32n,q32o,q32p,q32w,
                                      q67ah,q67am,q67bh,q67bm,q67ch,q67cm,q67dh,q67dm,
                                      q68a,q68c,
                                      q89c,q89d,q89e))
 
-save(w4data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w4 pa.RData"))
+save(w4data,file=paste0(workdir,"/Data/w4 pa.RData"))
 
 ######################################################################################
 # 6. Wave 5 Data
@@ -291,17 +267,11 @@ w5data <- subset(w5data, select = c(idproj,
                                     m5age,m5q85a,m5q85b,m5q85c,m5q85e,m5ariapgp,m5seifadis,m5marital,m5whobmigroup,m5q107c,m5q107d,m5q107e,m5q64,m5q65,
                                     m5smokst,m5q59,m5q60,m5q61,m5mnstrs,m5cesd10,m5q82ah,m5q82am,m5q82bh,m5q82bm,m5q82ch,m5q82cm,m5q82dh,m5q82dm,
                                     m5pf,m5mh,m5gh,m5re,m5rp,m5sf,m5bp,m5vt,m5pcsa,m5mcsa,
-                                    m5q38c,m5q38d,m5q38e,m5q38f,m5q38g,m5q38h,m5q38m,m5q38n,m5q38o,m5q38p,m5q38q,m5q38r,m5q38w))
+                                    m5q38c,m5q38d,m5q38e,m5q38m,m5q38n,m5q38o,m5q38p,m5q38q,m5q38r,m5q38w))
 w5data$wave <- 5
 w5data <- w5data %>% 
   rename_all(~stringr::str_replace(.,"^m5",""))
 
-w5data$heartdis_3yr <- ifelse(w5data$q38f>=1,
-                              1,0)
-w5data$hypert_3yr <- ifelse(w5data$q38g>=1,
-                            1,0)
-w5data$stroke_3yr <- ifelse(w5data$q38h>=1,
-                            1,0)  
 w5data$cancer_3yr <- ifelse(w5data$q38m==1 | w5data$q38n==1 | w5data$q38o==1 | w5data$q38p==1,
                             1,0)
 w5data <- w5data %>% 
@@ -364,12 +334,12 @@ w5data$moderate_time <- w5data$q82bh*60 + w5data$q82bm
 w5data$vig_leis_time <- w5data$q82ch*60 + w5data$q82cm
 w5data$vig_hous_time <- w5data$q82dh*60 + w5data$q82dm
 
-w5data <- subset(w5data, select = -c(q38c,q38d,q38e,q38f,q38g,q38h,q38m,q38n,q38o,q38p,q38w,
+w5data <- subset(w5data, select = -c(q38c,q38d,q38e,q38m,q38n,q38o,q38p,q38w,
                                      q82ah,q82am,q82bh,q82bm,q82ch,q82cm,q82dh,q82dm,
                                      q85a,q85b,q85c,q85e,
                                      q107c,q107d,q107e))
 
-save(w5data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w5 pa.RData"))
+save(w5data,file=paste0(workdir,"/Data/w5 pa.RData"))
 
 ######################################################################################
 # 7. Wave 6 Data
@@ -385,17 +355,11 @@ w6data <- subset(w6data, select = c(idproj,
                                     m6age,m6q84a,m6q84b,m6q84c,m6q84e,m6ariapgp,m6seifadis,m6marital,m6whobmigroup,m6q111c,m6q111d,m6q111e,m6q64,m6q65,
                                     m6smokst,m6q60,m6q61,m6q62,m6mnstrs,m6cesd10,m6q82atotmin,m6q82btotmin,m6q82ctotmin,m6q82dtotmin,m6q81a,m6q81b,m6q81c,m6q81d,
                                     m6pf,m6mh,m6gh,m6re,m6rp,m6sf,m6bp,m6vt,m6pcsa,m6mcsa,
-                                    m6q38c,m6q38d,m6q38e,m6q38f,m6q38g,m6q38h,m6q38m,m6q38n,m6q38o,m6q38p,m6q38q,m6q38r,m6q38x))
+                                    m6q38c,m6q38d,m6q38e,m6q38m,m6q38n,m6q38o,m6q38p,m6q38q,m6q38r,m6q38x))
 w6data$wave <- 6
 w6data <- w6data %>% 
   rename_all(~stringr::str_replace(.,"^m6",""))
 
-w6data$heartdis_3yr <- ifelse(w6data$q38f>=1,
-                              1,0)
-w6data$hypert_3yr <- ifelse(w6data$q38g>=1,
-                            1,0)
-w6data$stroke_3yr <- ifelse(w6data$q38h>=1,
-                            1,0)  
 w6data$cancer_3yr <- ifelse(w6data$q38m==1 | w6data$q38n==1 | w6data$q38o==1 | w6data$q38p==1,
                             1,0)
 w6data <- w6data %>% 
@@ -464,12 +428,12 @@ w6data$moderate_time <- ifelse(w6data$q81b==0,0,w6data$moderate_time)
 w6data$vig_leis_time <- ifelse(w6data$q81c==0,0,w6data$vig_leis_time)
 w6data$vig_hous_time <- ifelse(w6data$q81d==0,0,w6data$vig_hous_time)
 
-w6data <- subset(w6data, select = -c(q38c,q38d,q38e,q38f,q38g,q38h,q38m,q38n,q38o,q38p,q38x,
+w6data <- subset(w6data, select = -c(q38c,q38d,q38e,q38m,q38n,q38o,q38p,q38x,
                                      q81a,q81b,q81c,q81d,
                                      q84a,q84b,q84c,q84e,
                                      q111c,q111d,q111e))
 
-save(w6data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w6 pa.RData"))
+save(w6data,file=paste0(workdir,"/Data/w6 pa.RData"))
 
 ######################################################################################
 # 8. Wave 7 Data
@@ -485,17 +449,11 @@ w7data <- subset(w7data, select = c(idproj,
                                     m7age,m7q83a,m7q83b,m7q83c,m7q83e,m7ariapgp,m7seifadis,m7marital,m7whobmigroup,m7q101c,m7q101d,
                                     m7smokst,m7q51,m7q52,m7q53,m7mnstrs,m7cesd10,m7q47ahrs,m7q47amins,m7q47bhrs,m7q47bmins,m7q47chrs,m7q47cmins,m7q47dhrs,m7q47dmins,
                                     m7pf,m7mh,m7gh,m7re,m7rp,m7sf,m7bp,m7vt,m7pcsa,m7mcsa,
-                                    m7q32d,m7q32e,m7q32f,m7q32h,m7q32i,m7q32k,m7q32l,m7q32v,m7q32w,m7q32x,m7q32y,m7q32z,m7q32aa,m7q32cc,m7q32dd,m7q32bb,m7q32gg))
+                                    m7q32d,m7q32e,m7q32f,m7q32v,m7q32w,m7q32x,m7q32y,m7q32z,m7q32aa,m7q32cc,m7q32dd,m7q32h,m7q32bb,m7q32gg))
 w7data$wave <- 7
 w7data <- w7data %>% 
   rename_all(~stringr::str_replace(.,"^m7",""))
 
-w7data$heartdis_3yr <- ifelse(w7data$q32i>=1,
-                              1,0)
-w7data$hypert_3yr <- ifelse(w7data$q32k>=1,
-                            1,0)
-w7data$stroke_3yr <- ifelse(w7data$q32l>=1,
-                            1,0)  
 w7data$cancer_3yr <- ifelse(w7data$q32v==1 | w7data$q32v==1 | w7data$q32v==1 | w7data$q32v==1 | w7data$q32z==1 | w7data$q32aa==1,
                             1,0)
 w7data <- w7data %>% 
@@ -537,12 +495,12 @@ w7data$moderate_time <- w7data$q47bhrs*60 + w7data$q47bmins
 w7data$vig_leis_time <- w7data$q47chrs*60 + w7data$q47cmins
 w7data$vig_hous_time <- w7data$q47dhrs*60 + w7data$q47dmins
 
-w7data <- subset(w7data, select = -c(q32d,q32e,q32f,q32h,q32i,q32k,q32l,q32v,q32w,q32x,q32y,q32z,q32aa,q32bb,q32gg,
+w7data <- subset(w7data, select = -c(q32d,q32e,q32f,q32h,q32v,q32w,q32x,q32y,q32z,q32aa,q32bb,q32gg,
                                      q47ahrs,q47amins,q47bhrs,q47bmins,q47chrs,q47cmins,q47dhrs,q47dmins,
                                      q83a,q83b,q83c,q83e,
                                      q101c,q101d))
 
-save(w7data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w7 pa.RData"))
+save(w7data,file=paste0(workdir,"/Data/w7 pa.RData"))
 
 ######################################################################################
 # 9. Wave 8 Data
@@ -558,17 +516,11 @@ w8data <- subset(w8data, select = c(idproj,
                                     m8age,m8q66a,m8q66b,m8q66c,m8q66e,m8ariapgp,m8seifadis,m8marital,m8whobmigroup,m8q96c,m8q96d,m8q55,m8q56,
                                     m8smokst,m8q51,m8q52,m8q53,m8mnstrs,m8cesd10,m8q46atotmin,m8q46btotmin,m8q46ctotmin,m8q46dtotmin,
                                     m8q45a,m8q45b,m8q45c,m8q45d,m8pf,m8mh,m8gh,m8re,m8rp,m8sf,m8bp,m8vt,m8pcs_abs,m8mcs_abs,
-                                    m8q30d,m8q30e,m8q30f,m8q30h,m8q30i,m8q30k,m8q30l,m8q30v,m8q30w,m8q30x,m8q30y,m8q30z,m8q30aa,m8q30cc,m8q30dd,m8q30bb,m8q30gg))
+                                    m8q30d,m8q30e,m8q30f,m8q30v,m8q30w,m8q30x,m8q30y,m8q30z,m8q30aa,m8q30cc,m8q30dd,m8q30h,m8q30bb,m8q30gg))
 w8data$wave <- 8
 w8data <- w8data %>% 
   rename_all(~stringr::str_replace(.,"^m8",""))
 
-w8data$heartdis_3yr <- ifelse(w8data$q30i>=1,
-                              1,0)
-w8data$hypert_3yr <- ifelse(w8data$q30k>=1,
-                            1,0)
-w8data$stroke_3yr <- ifelse(w8data$q30l>=1,
-                            1,0)  
 w8data$cancer_3yr <- ifelse(w8data$q30v==1 | w8data$q30w==1 | w8data$q30x==1 | w8data$q30y==1 | w8data$q30z==1 | w8data$q30aa==1,
                             1,0)
 w8data <- w8data %>% 
@@ -641,12 +593,12 @@ w8data <- w8data %>%
   rename(pcsa = pcs_abs,
          mcsa = mcs_abs)
 
-w8data <- subset(w8data, select = -c(q30d,q30e,q30f,q30h,q30i,q30k,q30l,q30v,q30w,q30x,q30y,q30z,q30aa,q30bb,q30gg,
+w8data <- subset(w8data, select = -c(q30d,q30e,q30f,q30h,q30v,q30w,q30x,q30y,q30z,q30aa,q30bb,q30gg,
                                      q45a,q45b,q45c,q45d,
                                      q66a,q66b,q66c,q66e,
                                      q96c,q96d))
 
-save(w8data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w8 pa.RData"))
+save(w8data,file=paste0(workdir,"/Data/w8 pa.RData"))
 
 ######################################################################################
 # 10. Wave 9 Data
@@ -667,5 +619,126 @@ w9data <- w9data %>%
   rename(pcsa = pcs_abs,
          mcsa = mcs_abs)
 
-save(w9data,file=paste0(workdir,"Paper 1 - Health-related quality of life/Data/w9 pa.RData"))
+save(w9data,file=paste0(workdir,"/Data/w9 pa.RData"))
 
+######################################################################################
+# 11. Death Data
+#-------------------------------------------------------------------------------------
+
+# 11.1 Time of death data
+deathdata <- read_dta(paste0(workdir,"Data/recentmidstatus.dta"))
+deathdata <- zap_label(deathdata)
+deathdata <- zap_labels(deathdata)
+deathdata <- zap_formats(deathdata)
+
+deathdata$death_1 <- 0
+
+deathdata$death_2 <- ifelse(deathdata$deathdate>deathdata$Phase1DateSurveyReturned & 
+                             is.na(deathdata$Phase2DateSurveyReturned) &
+                             !is.na(deathdata$deathdate),1,0)
+deathdata$death_2 <- ifelse(deathdata$death_1==1,1,deathdata$death_2)
+
+deathdata$death_3 <- ifelse(deathdata$deathdate>deathdata$Phase2DateSurveyReturned & 
+                             is.na(deathdata$Phase3DateSurveyReturned) &
+                             !is.na(deathdata$deathdate),1,0)
+deathdata$death_3 <- ifelse(deathdata$death_2==1,1,deathdata$death_3)
+
+deathdata$death_4 <- ifelse(deathdata$deathdate>deathdata$Phase3DateSurveyReturned & 
+                             is.na(deathdata$Phase4DateSurveyReturned) &
+                             !is.na(deathdata$deathdate),1,0)
+deathdata$death_4 <- ifelse(deathdata$death_3==1,1,deathdata$death_4)
+
+deathdata$death_5 <- ifelse(deathdata$deathdate>deathdata$Phase4DateSurveyReturned & 
+                             is.na(deathdata$Phase5DateSurveyReturned) &
+                             !is.na(deathdata$deathdate),1,0)
+deathdata$death_5 <- ifelse(deathdata$death_4==1,1,deathdata$death_5)
+
+deathdata$death_6 <- ifelse(deathdata$deathdate>deathdata$Phase5DateSurveyReturned & 
+                             is.na(deathdata$Phase6DateSurveyReturned) &
+                             !is.na(deathdata$deathdate),1,0)
+deathdata$death_6 <- ifelse(deathdata$death_5==1,1,deathdata$death_6)
+
+deathdata$death_7 <- ifelse(deathdata$deathdate>deathdata$Phase6DateSurveyReturned & 
+                             is.na(deathdata$Phase7DateSurveyReturned) &
+                             !is.na(deathdata$deathdate),1,0)
+deathdata$death_7 <- ifelse(deathdata$death_6==1,1,deathdata$death_7)
+
+deathdata$death_8 <- ifelse(deathdata$deathdate>deathdata$Phase7DateSurveyReturned & 
+                             is.na(deathdata$Phase8DateSurveyReturned) &
+                             !is.na(deathdata$deathdate),1,0)
+deathdata$death_8 <- ifelse(deathdata$death_7==1,1,deathdata$death_8)
+
+deathdata$death_9 <- ifelse(deathdata$deathdate>deathdata$Phase8DateSurveyReturned & 
+                             is.na(deathdata$Phase9DateSurveyReturned) &
+                             !is.na(deathdata$deathdate),1,0)
+deathdata$death_9 <- ifelse(deathdata$death_8==1,1,deathdata$death_9)
+
+deathdata$censored_1 <- 1
+deathdata$censored_2 <- ifelse(deathdata$Attrition12>1 & deathdata$Attrition12<6,0,1)
+deathdata$censored_3 <- ifelse(deathdata$Attrition13>1 & deathdata$Attrition13<6,0,1)
+deathdata$censored_4 <- ifelse(deathdata$Attrition14>1 & deathdata$Attrition14<6,0,1)
+deathdata$censored_5 <- ifelse(deathdata$Attrition15>1 & deathdata$Attrition15<6,0,1)
+deathdata$censored_6 <- ifelse(deathdata$Attrition16>1 & deathdata$Attrition16<6,0,1)
+deathdata$censored_7 <- ifelse(deathdata$Attrition17>1 & deathdata$Attrition17<6,0,1)
+deathdata$censored_8 <- ifelse(deathdata$Attrition18>1 & deathdata$Attrition18<6,0,1)
+deathdata$censored_9 <- ifelse(deathdata$Attrition19>1 & deathdata$Attrition19<6,0,1)
+
+deathdata <- as.data.frame(deathdata)
+
+# Pass over waves to treat cases as retained if they completed a subsequent interview
+c_vars <- c("censored_2","censored_3","censored_4","censored_5","censored_6","censored_7","censored_8","censored_9")
+for (i in 7:1) {
+  deathdata[,c_vars[i]] <- ifelse(deathdata[,c_vars[i+1]]==1,1,deathdata[,c_vars[i]])
+}
+
+deathdata <- subset(deathdata, select = c(idproj,censored_1,censored_2,censored_3,censored_4,censored_5,censored_6,censored_7,censored_8,censored_9,
+                                          death_1,death_2,death_3,death_4,death_5,death_6,death_7,death_8,death_9))
+
+deathdata <- deathdata %>%
+  pivot_longer(
+    cols = censored_1:death_9,
+    names_to = c(".value", "wave"),
+    names_pattern = "([A-Za-z]+)_(\\d+)"
+  )
+deathdata$wave <- as.numeric(deathdata$wave)
+
+# 11.2 Cause of death data
+coddata <- read_dta(paste0(workdir,"Data/CODcodemid.dta"))
+
+coddata <- read_dta(paste0(workdir,"Data/CODcodemid.dta"))
+coddata <- zap_label(coddata)
+coddata <- zap_labels(coddata)
+coddata <- zap_formats(coddata)
+
+coddata$CVD <- substr(coddata$cod,1,1)=="I" | 
+  substr(coddata$cod2,1,1)=="I" | 
+  substr(coddata$cod3,1,1)=="I" | 
+  substr(coddata$cod4,1,1)=="I" | 
+  substr(coddata$cod5,1,1)=="I" | 
+  substr(coddata$cod6,1,1)=="I" | 
+  substr(coddata$cod7,1,1)=="I" | 
+  substr(coddata$cod8,1,1)=="I" | 
+  substr(coddata$cod9,1,1)=="I" | 
+  substr(coddata$cod10,1,1)=="I"
+
+coddata$cancer <- apply(coddata,1,function(r) any(r %in% c("C159","C160","C169","C180","C181","C187","C189",
+                                                           "C19","C20","C210","C221","C229","C250","C252","C259",
+                                                           "C509","C541","C64","C679")))
+
+coddata <- subset(coddata, select = c(idproj,CVD,cancer))
+
+# 11.3 Create data with wave and cause of death
+deathdata <- merge(deathdata,coddata,by="idproj",all.x=TRUE,all.y=TRUE)
+deathdata$CVD_censor <- deathdata$censored
+deathdata$CVD_death <- deathdata$death
+deathdata$CVD_death <- ifelse(deathdata$death==1 & deathdata$CVD!=1,NA,deathdata$CVD_death)
+deathdata$CVD_censor <- ifelse(deathdata$death==1 & is.na(deathdata$CVD_death),0,deathdata$CVD_censor)
+deathdata$cancer_censor <- deathdata$censored
+deathdata$cancer_death <- deathdata$death
+deathdata$cancer_death <- ifelse(deathdata$death==1 & deathdata$cancer!=1,NA,deathdata$cancer_death)
+deathdata$cancer_censor <- ifelse(deathdata$death==1 & is.na(deathdata$cancer_death),0,deathdata$cancer_censor)
+
+deathdata <- subset(deathdata, select = -c(CVD,cancer))
+deathdata <- deathdata[which(deathdata$wave>1),]
+
+save(deathdata,file=paste0(workdir,"/Data/death data.RData"))
