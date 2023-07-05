@@ -9,25 +9,26 @@
 # 1. Setup Environment
 #-------------------------------------------------------------------------------------
 
-workdir <- "Y:/PRJ-prc_alswh/Paper 1 - Health-related quality of life/"
+.libPaths("/home/z3312911/RPackages")
+workdir <- "/home/z3312911/alswh/"
 
-libs <- c("mice","miceadds","VIM","UpSetR","ggplot2")
+libs <- c("furrr","mice","miceadds","VIM","UpSetR","ggplot2","naniar")
 missing <- !libs %in% installed.packages()
 if (any(missing)) {
   install.packages(libs[missing])
 }
 lapply(libs, library, character.only = TRUE)
 
-set.seed(966495)
+set.seed(432455)
 
 ######################################################################################
 # 2. Load and process data
 #-------------------------------------------------------------------------------------
 
-load(paste0(workdir,"Data/imputation data.RData.RData"))
+load(paste0(workdir,"Data/imputation data.RData"))
 
 # Sort data from most to least missing, saving order to return data to original order if needed
-res<-summary(aggr(imp_data))$missings
+res <- summary(aggr(imp_data,plot=FALSE))$missings
 varorder <- res$Variable
 res<-res[order(-res$Count),]
 dataimp <- imp_data[,res$Variable]
@@ -68,15 +69,20 @@ default <- c("rf","rf","rf","rf") # Manually defined list of methods for each va
 # 4. Run multiple imputation using MICE with random forests
 #-------------------------------------------------------------------------------------
 
-imp_mice <- parlmice(data=dataimp,
-                     m=m,
-                     n.core=n,
-                     n.imp.core=nimpcore,
-                     maxit=maxit,
-                     defaultMethod=default,
-                     clusterseed=767693)
+imp_mice <- futuremice(data=dataimp,
+                       m=m,
+                       n.core=n,
+                       maxit=maxit,
+                       defaultMethod=default,
+                       parallelseed=216136)
 
 imp <- mids2datlist(imp_mice)
+
+imp[[41]] <- dataimp
+
+imp <- lapply(imp, function (x,varorder) {
+  x <- x[,varorder]
+},varorder=varorder)
 
 ######################################################################################
 # 5. Save data

@@ -1,7 +1,7 @@
 ######################################################################################
 ##   
 ## Effects of physical activity on health-related quality of life
-## Extract results from LTMLE MSM fits and pool using Rubin's rules
+## Create plots from results of LTMLE analysis
 ## Date: 7 October 2022
 ## OSF Registration: https://osf.io/6zkcw
 ##
@@ -9,7 +9,7 @@
 # 1. Setup Environment
 #-------------------------------------------------------------------------------------
 
-workdir <- "Y:/PRJ-prc_alswh/Paper 1 - Health-related quality of life/"
+workdir <- "R:/PRJ-prc_alswh/Paper 1 - Health-related quality of life/"
 
 libs <- c("Amelia","ggplot2","tidyr","ggpubr","stringr")
 missing <- !libs %in% installed.packages()
@@ -107,6 +107,13 @@ s2_fig_init$group <- factor(s2_fig_init$group)
 ######################################################################################
 # 2. Save summary output to excel for tables
 #-------------------------------------------------------------------------------------
+
+primary_mi_res_sust <- primary_mi_res_sust[,c(1:4,11:12,5:10,13:21)]
+primary_mi_res_init <- primary_mi_res_init[,c(1:4,11:12,5:10,13:21)]
+sensitivity_1_mi_res_sust <- sensitivity_1_mi_res_sust[,c(1:4,11:12,5:10,13:21)]
+sensitivity_1_mi_res_init <- sensitivity_1_mi_res_init[,c(1:4,11:12,5:10,13:21)]
+sensitivity_2_mi_res_sust <- sensitivity_2_mi_res_sust[,c(1:4,11:12,5:10,13:21)]
+sensitivity_2_mi_res_init <- sensitivity_2_mi_res_init[,c(1:4,11:12,5:10,13:21)]
 
 wb <- loadWorkbook(paste0(workdir,"Results/model-results.xlsx"), create = TRUE)
 createSheet(wb, name = "Primary")
