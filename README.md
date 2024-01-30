@@ -55,8 +55,8 @@ Code for all analysis in the article by HaGani et al 2024d.
 
 | Description | R Code |
 | --- | --- |
-| 1 - Data extraction - pull relevant variables from each wave | [Data extraction](Code/2024d/1_ALWSH_Extraction.R) |
-| 2 - Merge data - merge waves and create derived variables | [Merge data](Code/2024d/2_Merge_Code.R) |
+| 1 - Data extraction - pull relevant variables from each wave | [Data extraction](Code/2024d/1_ALSWH_Extraction.R) |
+| 2 - Merge data - merge waves and create derived variables | [Merge data](Code/2024d/2_Merge_code.R) |
 | 3 - Multiple imputation - impute intermittent missing data | [Imputation](Code/2024d/3_Multiple_Imputation.R) |
 | 4 - Final data creation - finalise imputed data and structure for analysis | [Finalise data](Code/2024d/4_Data_Finalise.R) |
 | 5 - Analysis of all-cause mortality - using dynamic regimes based on age, using the package 'ltmle' (1). | [All-cause analysis](Code/2024d/5_All_cause_analysis.R) |
