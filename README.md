@@ -1,6 +1,6 @@
-# ALSWH Project Physical activity trajectories and associations with health-related quality of life and mortality outcomes
+# Analysis of the Australian Longitudinal Study of Women's Health (ALSWH)
 
-This repository contains R code used in articles using the Australian Longitudinal Study of Women's Health (ALSWH).
+This repository contains R code used in articles using the ALSWH.
 
 ## Physical activity across midlife and health-related quality of life in Australian women: A target trial emulation using a longitudinal cohort
 Code for all analysis in the article examining the causal effects of meeting physical activity on health-related quality of life (Nguyen-duy et al 2024) published in Plos Medicine: https://doi.org/10.1371/journal.pmed.1004384.
