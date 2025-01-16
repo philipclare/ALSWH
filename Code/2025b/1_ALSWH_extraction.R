@@ -10,7 +10,7 @@
 ######################################################################################
 # Setup Environment----------
 
-workdir <- "R:/PRJ-Loneliness_ALSWH/Data/"
+workdir <- "Y:/PRJ-Loneliness_ALSWH/Data/"
 
 libs <- c("haven","plyr","dplyr","tidyr")
 missing <- !libs %in% installed.packages()

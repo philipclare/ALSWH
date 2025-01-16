@@ -13,7 +13,7 @@
 
 workdir <- "Y:/PRJ-Loneliness_ALSWH/"
 
-libs <- c("haven","plyr","dplyr")
+libs <- c("haven","plyr","dplyr","tidyr")
 missing <- !libs %in% installed.packages()
 if (any(missing)) {
   install.packages(libs[missing])
@@ -23,6 +23,7 @@ lapply(libs, library, character.only = TRUE)
 ######################################################################################
 # 2. Load individual wave data and merge into long form
 #-------------------------------------------------------------------------------------
+
 load(file=paste0(workdir,"Data/loneliness and mortality w1t.RData"))
 load(file=paste0(workdir,"Data/loneliness and mortality w1b.RData"))
 load(file=paste0(workdir,"Data/loneliness and mortality w2t.RData"))
@@ -51,9 +52,9 @@ long_data <-
 long_data <- merge(long_data, w1datab, by = "idproj")
 long_data <- merge(long_data, w2datab, by = "idproj")
 
-# subset data for initial latent class analyses
-latent_class_data <- subset(long_data, select = c(idproj, wave, b_wtarea, lonely_category))
-save(latent_class_data,file=paste0(workdir,"Data/latent_class_data.RData"))
+# # subset data for initial latent class analyses
+# latent_class_data <- subset(long_data, select = c(idproj, wave, b_wtarea, lonely_category))
+# save(latent_class_data,file=paste0(workdir,"Data/latent_class_data.RData"))
 
 # remove the chosen data sets from the environment
 rm(w1datab, w1datat, w2datab, w2datat, w3data, w4data, w5data, w6data, w7data, w8data)
@@ -104,14 +105,6 @@ wide_data <- reshape(long_data,
                      sep = "",
                      dir="wide")
 
-# Drop cases with  with history of major illness
-wide_data <- wide_data[!(wide_data$b_heartdis_ever>0),] 
-wide_data <- wide_data[!(wide_data$b_stroke_ever>0),]
-wide_data <- wide_data[!(wide_data$b_cancer_ever>0),]
-
-# removing unnecessary variables 
-wide_data <- subset(wide_data, select = -c(b_heartdis_ever, b_stroke_ever, b_cancer_ever))
-
 # 4.2 Drop participants who died before wave 4
 #wide_data <- wide_data[which(wide_data$death2=="No" & wide_data$death3=="No"), ]
 
@@ -152,7 +145,7 @@ imp_data$employ <- factor(imp_data$employ,labels=c("Not employed","Employed"))
 imp_data$lonely_category <- factor(imp_data$lonely_category,labels=c("Rarely/none","Sometimes",
                                                                     "Most/all of time", "Occasionally"))
 # factorise all the variables on the list no/yes
-ny_list <- c("live_alone", "depression_3yr","anxiety_3yr", "b_depression_ever", "b_anxiety_ever", 
+ny_list <- c("live_alone", "depression_3yr","anxiety_3yr", "b_depression_ever", "b_anxiety_ever","b_heartdis_ever", "b_stroke_ever", "b_cancer_ever", 
              "death", "censored")
 imp_data[,ny_list] <- lapply(imp_data[,ny_list], factor, labels=c("No","Yes"))
 

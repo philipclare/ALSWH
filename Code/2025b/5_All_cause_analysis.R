@@ -70,22 +70,10 @@ rm(consec_sum1,consec_sum2,consec_sum3,consec_sum4,consec_sum5,consec_sum6)
 
 temp <- cbind(regime_list,regime_sum,consec_sum)
 
-sum.measures1 <- array(dim = c(64, 1, 6))
-for (cnt in 1:6) {
-  sum.measures1[, , cnt] <- matrix(regime_sum[,cnt],nrow=64)
-}
-colnames(sum.measures1) <- c("num_waves")
-msm.formula1 <- "Y ~ num_waves"
-
-sum.measures2 <- array(dim = c(64, 1, 6))
-for (cnt in 1:6) {
-  sum.measures2[, , cnt] <- matrix(consec_sum[,cnt],nrow=64)
-}
-colnames(sum.measures2) <- c("num_consec_waves")
-msm.formula2 <- "Y ~ num_consec_waves"
-
-sum.measures <- list(sum.measures1,sum.measures2)
-msm.formula <- list(msm.formula1,msm.formula2)
+sum.measures <- array(dim = c(64, 1, 1))
+sum.measures[, 1, 1] <- matrix(regime_sum[,6],nrow=64)
+colnames(sum.measures) <- c("num_waves")
+msm.formula <- "Y ~ num_waves"
 
 data <- list("pr","s1","s2")
 desc <- list("num","consec")
@@ -185,13 +173,15 @@ model_fit_msm <- ltmleMSM(analysis_data,
                           Qform = qform,
                           gform = gform,
                           regimes = regimes,
-                          summary.measures = sum.measures[[args[3]]],
-                          working.msm = msm.formula[[args[3]]],
+                          summary.measures = sum.measures,
+                          working.msm = msm.formula,
                           survivalOutcome = TRUE,
                           observation.weights = analysis_data$wtarea,
                           SL.library = SLlib)
 
 summary(model_fit_msm)
+
+coef <- setNames(summary(model_fit_msm)$cmat[,1], rownames(summary(model_fit_msm)$cmat))
 
 cov.mat_ic <- var(model_fit_msm$IC)
 cov.mat_tmle <- model_fit_msm$variance.estimate
@@ -206,115 +196,36 @@ for (i in seq_along(ic_temp)) {
     cov.mat_max[[i]] <- tmle_temp[[i]]
   }
 }
-cov.mat_max <- matrix(cov.mat_max,nrow=2)
-colnames(cov.mat_max) <- c("S1","S2")
-rownames(cov.mat_max) <- c("S1","S2")
+cov.mat_max <- matrix(cov.mat_max,nrow=4)
+colnames(cov.mat_max) <- rownames(summary(model_fit_msm)$cmat)
+rownames(cov.mat_max) <- rownames(summary(model_fit_msm)$cmat)
 
-fin_sum <- list(summary(model_fit_msm),cov.mat_ic,cov.mat_tmle,cov.mat_max)
+cov.mat_ic <- cov.mat_ic/n
+cov.mat_tmle <- cov.mat_tmle/n
+cov.mat_max <- cov.mat_max/n
 
-res <- c(c(plogis(summary(model_fit_msm)$cmat[1,1]),
-           plogis(summary(model_fit_msm)$cmat[1,1]+1*summary(model_fit_msm)$cmat[2,1]),
-           plogis(summary(model_fit_msm)$cmat[1,1]+2*summary(model_fit_msm)$cmat[2,1]),
-           plogis(summary(model_fit_msm)$cmat[1,1]+3*summary(model_fit_msm)$cmat[2,1]),
-           plogis(summary(model_fit_msm)$cmat[1,1]+4*summary(model_fit_msm)$cmat[2,1]),
-           plogis(summary(model_fit_msm)$cmat[1,1]+5*summary(model_fit_msm)$cmat[2,1]),
-           plogis(summary(model_fit_msm)$cmat[1,1]+6*summary(model_fit_msm)$cmat[2,1])))
+sum <- list(summary(model_fit_msm),cov.mat_ic,cov.mat_tmle,cov.mat_max)
 
-gradient_mn <- list(c(res[1]*(1-res[1]), 0),
-                    c(res[2]*(1-res[2]), res[2]*(1-res[2])),
-                    c(res[3]*(1-res[3]), res[3]*(1-res[3])),
-                    c(res[4]*(1-res[4]), res[4]*(1-res[4])),
-                    c(res[5]*(1-res[5]), res[5]*(1-res[5])),
-                    c(res[6]*(1-res[6]), res[6]*(1-res[6])),
-                    c(res[7]*(1-res[7]), res[7]*(1-res[7])))
+pr <- do.call(rbind,lapply(seq(0,7), function (x) {
+  car::deltaMethod(coef,"exp((Intercept)+x*num_waves)/(1+exp((Intercept)+x*num_waves))",vcov=cov.mat_max)
+}))
 
-v_ic_mn <- do.call(rbind,lapply(gradient_mn, function(z, model_fit_msm) {
-  v <- t(z) %*% cov.mat_ic %*% z
-  std.dev <- sqrt(v[1, 1] / dim(model_fit_msm$IC)[1])
-}, model_fit_msm= model_fit_msm))
+rr <- do.call(rbind,lapply(seq(0,7), function (x) {
+  car::deltaMethod(coef,"(exp((Intercept)+x*num_waves)/(1+exp((Intercept)+x*num_waves)))/(exp((Intercept)+0*num_waves)/(1+exp((Intercept)+0*num_waves)))",vcov=cov.mat_max)
+}))
 
-v_tmle_mn <- do.call(rbind,lapply(gradient_mn, function(z,model_fit_msm) {
-  v <- t(z) %*% cov.mat_tmle %*% z
-  std.dev <- sqrt(v[1, 1] / dim(model_fit_msm$IC)[1])
-},model_fit_msm =model_fit_msm))
-
-v_max_mn <- do.call(rbind,lapply(gradient_mn, function(z,model_fit_msm) {
-  v <- t(z) %*% cov.mat_max %*% z
-  std.dev <- sqrt(v[1, 1] / dim(model_fit_msm$IC)[1])
-},model_fit_msm =model_fit_msm))
-
-fin_res_mn <- matrix(cbind(res,v_ic_mn,v_tmle_mn,v_max_mn),nrow=7)
-
-gradient_rr <- list(c(res[1]-res[2], 1-res[2]),
-                    c(res[1]-res[3], 1-res[3]),
-                    c(res[1]-res[4], 1-res[4]),
-                    c(res[1]-res[5], 1-res[5]),
-                    c(res[1]-res[6], 1-res[6]),
-                    c(res[1]-res[7], 1-res[7]))
-
-v_ic_rr <- do.call(rbind,lapply(gradient_rr, function(z, model_fit_msm) {
-  v <- t(z) %*% cov.mat_ic %*% z
-  std.dev <- sqrt(v[1, 1] / dim(model_fit_msm$IC)[1])
-},model_fit_msm=model_fit_msm))
-
-v_tmle_rr <- do.call(rbind,lapply(gradient_rr, function(z,model_fit_msm) {
-  v <- t(z) %*% cov.mat_tmle %*% z
-  std.dev <- sqrt(v[1, 1] / dim(model_fit_msm$IC)[1])
-},model_fit_msm=model_fit_msm))
-
-v_max_rr <- do.call(rbind,lapply(gradient_rr, function(z,model_fit_msm) {
-  v <- t(z) %*% cov.mat_max %*% z
-  std.dev <- sqrt(v[1, 1] / dim(model_fit_msm$IC)[1])
-},model_fit_msm=model_fit_msm))
-
-rr <- c(res[2]/res[1],
-        res[3]/res[1],
-        res[4]/res[1],
-        res[5]/res[1],
-        res[6]/res[1],
-        res[7]/res[1])
-
-fin_res_rr <- matrix(cbind(rr,v_ic_rr,v_tmle_rr,v_max_rr),nrow=6)
-
-gradient_rdiff <- list(c(res[2]*(1-res[2]) - res[1]*(1-res[1]), res[2]*(1-res[2])),
-                       c(res[3]*(1-res[3]) - res[1]*(1-res[1]), res[3]*(1-res[3])),
-                       c(res[4]*(1-res[4]) - res[1]*(1-res[1]), res[4]*(1-res[4])),
-                       c(res[5]*(1-res[5]) - res[1]*(1-res[1]), res[5]*(1-res[5])),
-                       c(res[6]*(1-res[6]) - res[1]*(1-res[1]), res[6]*(1-res[6])),
-                       c(res[7]*(1-res[7]) - res[1]*(1-res[1]), res[7]*(1-res[7])))
-
-v_ic_rdiff <- do.call(rbind,lapply(gradient_rdiff, function(z, model_fit_msm) {
-  v <- t(z) %*% cov.mat_ic %*% z
-  std.dev <- sqrt(v[1, 1] / dim(model_fit_msm$IC)[1])
-},model_fit_msm=model_fit_msm))
-
-v_tmle_rdiff <- do.call(rbind,lapply(gradient_rdiff, function(z,model_fit_msm) {
-  v <- t(z) %*% cov.mat_tmle %*% z
-  std.dev <- sqrt(v[1, 1] / dim(model_fit_msm$IC)[1])
-},model_fit_msm=model_fit_msm))
-
-v_max_rdiff <- do.call(rbind,lapply(gradient_rdiff, function(z,model_fit_msm) {
-  v <- t(z) %*% cov.mat_max %*% z
-  std.dev <- sqrt(v[1, 1] / dim(model_fit_msm$IC)[1])
-},model_fit_msm=model_fit_msm))
-
-rdiff <- c(res[2]-res[1],
-           res[3]-res[1],
-           res[4]-res[1],
-           res[5]-res[1],
-           res[6]-res[1],
-           res[7]-res[1])
-
-fin_res_rdiff <- matrix(cbind(rdiff,v_ic_rdiff,v_tmle_rdiff,v_max_rdiff),nrow=6)
+rd <- do.call(rbind,lapply(seq(0,7), function (x) {
+  car::deltaMethod(coef,"(exp((Intercept)+x*num_waves)/(1+exp((Intercept)+x*num_waves)))/(exp((Intercept)+0*num_waves)-(1+exp((Intercept)+0*num_waves)))",vcov=cov.mat_max)
+}))
 
 ######################################################################################
 # 5. Save output
 #-------------------------------------------------------------------------------------
 
-saveRDS(fin_sum,file=paste0(workdir,"Results/ltmle-",data[[args[2]]],"-sum-",desc[[args[3]]],"-",args[4],".rds"))
-saveRDS(fin_res_mn,file=paste0(workdir,"Results/ltmle-",data[[args[2]]],"-mn-",desc[[args[3]]],"-",args[4],".rds"))
-saveRDS(fin_res_rr,file=paste0(workdir,"Results/ltmle-",data[[args[2]]],"-rr-",desc[[args[3]]],"-",args[4],".rds"))
-saveRDS(fin_res_rdiff,file=paste0(workdir,"Results/ltmle-",data[[args[2]]],"-rd-",desc[[args[3]]],"-",args[4],".rds"))
+saveRDS(sum,file=paste0(workdir,"Results/ltmle-",data[[args[2]]],"-sum-",desc[[args[3]]],"-",args[4],".rds"))
+saveRDS(pr,file=paste0(workdir,"Results/ltmle-",data[[args[2]]],"-mn-",desc[[args[3]]],"-",args[4],".rds"))
+saveRDS(rr,file=paste0(workdir,"Results/ltmle-",data[[args[2]]],"-rr-",desc[[args[3]]],"-",args[4],".rds"))
+saveRDS(rd,file=paste0(workdir,"Results/ltmle-",data[[args[2]]],"-rd-",desc[[args[3]]],"-",args[4],".rds"))
 
 end_time <- Sys.time()
 end_time - start_time
