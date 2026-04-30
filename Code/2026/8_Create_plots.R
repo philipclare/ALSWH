@@ -22,7 +22,7 @@ if (Sys.info()[['sysname']]=="Linux") {
   workdir <- "/Volumes/research-data/PRJ-prc_alswh/Paper 3 - Obesity/" # MAC
 }
 
-libs <- c("Amelia","ggplot2","tidyr","ggpubr","openxlsx","stringr","grid")
+libs <- c("Amelia","ggplot2","tidyr","ggdist","ggpubr","openxlsx","stringr","grid")
 missing <- !libs %in% installed.packages()
 if (any(missing)) {
   install.packages(libs[missing])
@@ -35,7 +35,9 @@ lapply(libs, library, character.only = TRUE)
 
 res_mn_pr <- readRDS(file=paste0(workdir,"Results/Processed/means - binary.rds"))
 res_rr_pr <- readRDS(file=paste0(workdir,"Results/Processed/rrs - binary.rds"))
+res_rr_pr_natural <- readRDS(file=paste0(workdir,"Results/Processed/rrs - natural - binary.rds"))
 res_rd_pr <- readRDS(file=paste0(workdir,"Results/Processed/rds - binary.rds"))
+res_rd_pr_natural <- readRDS(file=paste0(workdir,"Results/Processed/rds - natural - binary.rds"))
 
 res_mn_cat <- readRDS(file=paste0(workdir,"Results/Processed/means - categorical.rds"))
 res_rr_cat <- readRDS(file=paste0(workdir,"Results/Processed/rrs - categorical.rds"))
@@ -65,6 +67,9 @@ res_mn_sns2 <- readRDS(file=paste0(workdir,"Results/Processed/means - sensitivit
 res_rr_sns2 <- readRDS(file=paste0(workdir,"Results/Processed/rrs - sensitivity 2 - drop fully imputed.rds"))
 res_rd_sns2 <- readRDS(file=paste0(workdir,"Results/Processed/rds - sensitivity 2 - drop fully imputed.rds"))
 
+res_mn_bmi <- readRDS(file=paste0(workdir,"Results/Processed/means - bmi analysis.rds"))
+res_md_bmi <- readRDS(file=paste0(workdir,"Results/Processed/mds - bmi analysis.rds"))
+
 ######################################################################################
 # 3. Define theme and common properties
 #-------------------------------------------------------------------------------------
@@ -85,26 +90,65 @@ figure_theme <- theme_classic() +
 #-------------------------------------------------------------------------------------
 
 # 4.1 Incidence-risk
-mn_pr <- ggplot(res_mn_pr,aes(x=num, y=est, label=label)) +
+mn_pr <- ggplot(res_mn_pr[-9,],aes(x=num, y=est, label=label)) +
   geom_ribbon(aes(ymin=lb, ymax=ub), alpha=0.3, fill="darkblue") +
   geom_line(position=pd, colour="darkblue") +
   geom_point(position=pd, size=3, shape=20, colour="darkblue") +
-  geom_text(hjust = 0.5, nudge_y = -0.01, size=2.5) +
+  geom_text(hjust = 0.5, nudge_y = -0.015, size=2.5) +
   xlab("Number of waves meeting recommendations") +
-  ylab("Incidence-risk of obesity") +
+  ylab("Incidence-risk") +
   expand_limits(y=c(0, 0.2)) +
   scale_y_continuous(breaks=seq(0, 0.2, by = 0.05), expand = c(0, 0), labels = scales::percent) +
-  scale_x_continuous(breaks=seq(0, 7, by = 1)) +
+  scale_x_continuous(breaks=seq(0,7),labels=c(0,1,2,3,4,5,6,7)) +
   figure_theme
+mn_pr
+
+# 4.1 Incidence-risk
+res_mn_pr$lb2 <- ifelse(res_mn_pr$group=="natural",res_mn_pr$lb,NA)
+res_mn_pr$ub2 <- ifelse(res_mn_pr$group=="natural",res_mn_pr$ub,NA)
+
+res_mn_pr[10,] <- res_mn_pr[9,]
+res_mn_pr[11,] <- res_mn_pr[9,]
+res_mn_pr[c(10,11),c(2,3,7)] <- NA
+res_mn_pr[10,1] <- 7.75
+res_mn_pr[11,1] <- 8.25
+
+mn_pr_natural <- ggplot(res_mn_pr,aes(x=num, y=est, label=label, colour=group, fill=group)) +
+  geom_ribbon(aes(ymin=lb, ymax=ub), alpha=0.3) +
+  geom_line(position=pd) +
+  geom_point(position=pd, size=3, shape=20) +
+  geom_text(hjust = 0.5, nudge_y = -0.015, size=2.5, colour="black") +
+  xlab("Number of waves meeting recommendations") +
+  ylab("Incidence-risk") +
+  expand_limits(y=c(0, 0.2)) +
+  scale_y_continuous(breaks=seq(0, 0.2, by = 0.05), expand = c(0, 0), labels = scales::percent) +
+  scale_x_continuous(breaks=seq(0,8),labels=c(0,1,2,3,4,5,6,7,"Natural")) +
+  figure_theme + 
+  scale_fill_manual(values=c("darkblue","darkblue")) + 
+  scale_colour_manual(values=c("darkblue","darkblue"))
+mn_pr_natural
 
 # 4.2 Relative risk
 rr_pr <- ggplot(res_rr_pr,aes(x=num, y=est, label=label)) +
   geom_ribbon(aes(ymin=lb, ymax=ub), alpha=0.3, fill="darkblue") +
   geom_line(position=pd, colour="darkblue") +
   geom_point(position=pd, size=3, shape=20, colour="darkblue") +
-  geom_text(hjust = 0.5, nudge_y = -0.1, size=2.5) +
+  geom_text(hjust = 0.5, nudge_y = -0.15, size=2.5) +
   xlab("Number of waves meeting recommendations") +
-  ylab("Risk ratio in obesity") +
+  ylab("Risk ratio") +
+  expand_limits(y=c(0, 2.0)) +
+  scale_y_continuous(breaks=seq(0, 2.0, by = 0.5), expand = c(0, 0)) +
+  scale_x_continuous(breaks=seq(0, 7, by = 1)) +
+  figure_theme
+
+# 4.2 Relative risk - vs Natural path
+rr_pr_natural <- ggplot(res_rr_pr_natural,aes(x=num, y=est, label=label)) +
+  geom_ribbon(aes(ymin=lb, ymax=ub), alpha=0.3, fill="darkblue") +
+  geom_line(position=pd, colour="darkblue") +
+  geom_point(position=pd, size=3, shape=20, colour="darkblue") +
+  geom_text(hjust = 0.5, nudge_y = -0.15, size=2.5) +
+  xlab("Number of waves meeting recommendations") +
+  ylab("Risk ratio") +
   expand_limits(y=c(0, 2.0)) +
   scale_y_continuous(breaks=seq(0, 2.0, by = 0.5), expand = c(0, 0)) +
   scale_x_continuous(breaks=seq(0, 7, by = 1)) +
@@ -115,35 +159,60 @@ rd_pr <- ggplot(res_rd_pr,aes(x=num, y=est, label=label)) +
   geom_ribbon(aes(ymin=lb, ymax=ub), alpha=0.3, fill="darkblue") +
   geom_line(position=pd, colour="darkblue") +
   geom_point(position=pd, size=3, shape=20, colour="darkblue") +
-  geom_text(hjust = 0.5, nudge_y = -0.01, size=2.5) +
+  geom_text(hjust = 0.5, nudge_y = -0.015, size=2.5) +
   xlab("Number of waves meeting recommendations") +
-  ylab("Risk difference in obesity") +
+  ylab("Risk difference") +
+  expand_limits(y=c(-0.05, 0.1)) +
+  scale_y_continuous(breaks=seq(-0.05, 0.1, by = 0.05), expand = c(0, 0), labels = scales::percent) +
+  scale_x_continuous(breaks=seq(0, 7, by = 1)) +
+  figure_theme
+
+# 4.2. Risk difference - vs Natural path
+rd_pr_natural <- ggplot(res_rd_pr_natural,aes(x=num, y=est, label=label)) +
+  geom_ribbon(aes(ymin=lb, ymax=ub), alpha=0.3, fill="darkblue") +
+  geom_line(position=pd, colour="darkblue") +
+  geom_point(position=pd, size=3, shape=20, colour="darkblue") +
+  geom_text(hjust = 0.5, nudge_y = -0.015, size=2.5) +
+  xlab("Number of waves meeting recommendations") +
+  ylab("Risk difference") +
   expand_limits(y=c(-0.05, 0.1)) +
   scale_y_continuous(breaks=seq(-0.05, 0.1, by = 0.05), expand = c(0, 0), labels = scales::percent) +
   scale_x_continuous(breaks=seq(0, 7, by = 1)) +
   figure_theme
 
 # 4.4. Combined difference plot
-diff_pr <- ggarrange(rr_pr + rremove("xlab")  + rremove("x.text"),
+diff_pr <- ggarrange(mn_pr + rremove("xlab")  + rremove("x.text"),
+                     rr_pr + rremove("xlab")  + rremove("x.text"),
                      rd_pr,
                      ncol=1,
                      align="v")
 
-mn_pr
+# 4.4. Combined difference plot
+diff_pr_natural <- ggarrange(mn_pr_natural + rremove("xlab"),
+                     rr_pr_natural + rremove("xlab")  + rremove("x.text"),
+                     rd_pr_natural,
+                     ncol=1,
+                     align="v")
+
 diff_pr
-
+diff_pr_natural
 # 4.5. Save plots
-ggsave(paste0(workdir,"Results/f1-incidence-risk.tiff"),
-       mn_pr,
-       width = 2400,
-       height = 1200,
-       units = "px")
+# ggsave(paste0(workdir,"Results/f1-incidence-risk.tiff"),
+#        mn_pr,
+#        width = 2400,
+#        height = 1200,
+#        units = "px")
 
-ggsave(paste0(workdir,"Results/f2-differences.tiff"),
+ggsave(paste0(workdir,"Results/f1-combined.tiff"),
        diff_pr,
-       width = 2400,
-       height = 2200,
-       units = "px")
+       width = 16,
+       height = 20,
+       units = "cm")
+ggsave(paste0(workdir,"Results/f1-combined-natural.tiff"),
+       diff_pr_natural,
+       width = 16,
+       height = 20,
+       units = "cm")
 
 ######################################################################################
 # 5. 300+ analysis plots
@@ -156,7 +225,7 @@ mn_300 <- ggplot(res_mn_cat[which(res_mn_cat$exp=="exceed"),],aes(x=num, y=est, 
   geom_point(position=pd, size=3, shape=20, colour="darkblue") +
   geom_text(hjust = 0.5, nudge_y = -0.01, size=2.5) +
   xlab("Number of waves meeting recommendations") +
-  ylab("Incidence-risk of obesity") +
+  ylab("Incidence-risk") +
   expand_limits(y=c(0, 0.2)) +
   scale_y_continuous(breaks=seq(0, 0.2, by = 0.05), expand = c(0, 0), labels = scales::percent) +
   scale_x_continuous(breaks=seq(0, 7, by = 1)) +
@@ -189,26 +258,24 @@ rd_300 <- ggplot(res_rd_cat[which(res_rd_cat$exp=="exceed"),],aes(x=num, y=est, 
   figure_theme
 
 # 5.4. Combined difference plot
-diff_300 <- ggarrange(rr_300  + rremove("xlab")  + rremove("x.text"),
+diff_300 <- ggarrange(mn_300  + rremove("xlab")  + rremove("x.text"),
+                      rr_300  + rremove("xlab")  + rremove("x.text"),
                       rd_300,
                       ncol=1,
                       align="v")
 
-mn_300
-diff_300
-
 # 5.5. Save plots
-ggsave(paste0(workdir,"Results/s1-incidence-risk-300.tiff"),
-       mn_300,
-       width = 2400,
-       height = 1200,
-       units = "px")
+# ggsave(paste0(workdir,"Results/s1-incidence-risk-300.tiff"),
+#        mn_300,
+#        width = 2400,
+#        height = 1200,
+#        units = "px")
 
-ggsave(paste0(workdir,"Results/s2-differences-300.tiff"),
+ggsave(paste0(workdir,"Results/s1-combined-300.tiff"),
        diff_300,
-       width = 2400,
-       height = 2200,
-       units = "px")
+       width = 16,
+       height = 20,
+       units = "cm")
 
 ######################################################################################
 # 6. Severe obesity outcome plots
@@ -221,7 +288,7 @@ mn_sev <- ggplot(res_mn_sev,aes(x=num, y=est, label=label)) +
   geom_point(position=pd, size=3, shape=20, colour="darkblue") +
   geom_text(hjust = 0.5, nudge_y = -0.003, size=2.5) +
   xlab("Number of waves meeting recommendations") +
-  ylab("Incidence-risk of severe obesity") +
+  ylab("Incidence-risk") +
   expand_limits(y=c(0, 0.05)) +
   scale_y_continuous(breaks=seq(0, 0.05, by = 0.01), expand = c(0, 0), labels = scales::percent) +
   scale_x_continuous(breaks=seq(0, 7, by = 1)) +
@@ -254,26 +321,24 @@ rd_sev <- ggplot(res_rd_sev,aes(x=num, y=est, label=label)) +
   figure_theme
 
 # 6.4. Combined difference plot
-diff_sev <- ggarrange(rr_sev  + rremove("xlab")  + rremove("x.text"),
+diff_sev <- ggarrange(mn_sev + rremove("xlab")  + rremove("x.text"),
+                      rr_sev + rremove("xlab")  + rremove("x.text"),
                       rd_sev,
                       ncol=1,
                       align="v")
 
-mn_sev
-diff_sev
-
 # 6.5. Save plots
-ggsave(paste0(workdir,"Results/s3-incidence-risk-severe-outcome.tiff"),
-       mn_sev,
-       width = 2400,
-       height = 1200,
-       units = "px")
+# ggsave(paste0(workdir,"Results/s3-incidence-risk-severe-outcome.tiff"),
+#        mn_sev,
+#        width = 2400,
+#        height = 1200,
+#        units = "px")
 
-ggsave(paste0(workdir,"Results/s4-differences-severe-outcome.tiff"),
+ggsave(paste0(workdir,"Results/s2-combined-severe-outcome.tiff"),
        diff_sev,
-       width = 2400,
-       height = 2200,
-       units = "px")
+       width = 16,
+       height = 20,
+       units = "cm")
 
 ######################################################################################
 # 7. Five percent weight increase
@@ -286,7 +351,7 @@ mn_five <- ggplot(res_mn_five,aes(x=num, y=est, label=label)) +
   geom_point(position=pd, size=3, shape=20, colour="darkblue") +
   geom_text(hjust = 0.5, nudge_y = -0.05, size=2.5) +
   xlab("Number of waves meeting recommendations") +
-  ylab("Incidence-risk of severe obesity") +
+  ylab("Incidence-risk") +
   expand_limits(y=c(0, 0.8)) +
   scale_y_continuous(breaks=seq(0, 0.8, by = 0.1), expand = c(0, 0), labels = scales::percent) +
   scale_x_continuous(breaks=seq(0, 7, by = 1)) +
@@ -319,26 +384,24 @@ rd_five <- ggplot(res_rd_five,aes(x=num, y=est, label=label)) +
   figure_theme
 
 # 7.4. Combined difference plot
-diff_five <- ggarrange(rr_five  + rremove("xlab")  + rremove("x.text"),
-                      rd_five,
-                      ncol=1,
-                      align="v")
-
-mn_five
-diff_five
+diff_five <- ggarrange(mn_five + rremove("xlab")  + rremove("x.text"),
+                       rr_five + rremove("xlab")  + rremove("x.text"),
+                       rd_five,
+                       ncol=1,
+                       align="v")
 
 # 7.5. Save plots
-ggsave(paste0(workdir,"Results/s5-incidence-risk-five-percent.tiff"),
-       mn_five,
-       width = 2400,
-       height = 1200,
-       units = "px")
+# ggsave(paste0(workdir,"Results/s5-incidence-risk-five-percent.tiff"),
+#        mn_five,
+#        width = 2400,
+#        height = 1200,
+#        units = "px")
 
-ggsave(paste0(workdir,"Results/s6-differences-five-percent.tiff"),
+ggsave(paste0(workdir,"Results/s3-combined-five-percent.tiff"),
        diff_five,
-       width = 2400,
-       height = 2200,
-       units = "px")
+       width = 16,
+       height = 20,
+       units = "cm")
 
 ######################################################################################
 # 8. Ten percent weight increase
@@ -351,7 +414,7 @@ mn_ten <- ggplot(res_mn_ten,aes(x=num, y=est, label=label)) +
   geom_point(position=pd, size=3, shape=20, colour="darkblue") +
   geom_text(hjust = 0.5, nudge_y = -0.04, size=2.5) +
   xlab("Number of waves meeting recommendations") +
-  ylab("Incidence-risk of severe obesity") +
+  ylab("Incidence-risk") +
   expand_limits(y=c(0, 0.6)) +
   scale_y_continuous(breaks=seq(0, 0.6, by = 0.1), expand = c(0, 0), labels = scales::percent) +
   scale_x_continuous(breaks=seq(0, 7, by = 1)) +
@@ -384,26 +447,24 @@ rd_ten <- ggplot(res_rd_ten,aes(x=num, y=est, label=label)) +
   figure_theme
 
 # 8.4. Combined difference plot
-diff_ten <- ggarrange(rr_ten  + rremove("xlab")  + rremove("x.text"),
+diff_ten <- ggarrange(mn_ten + rremove("xlab")  + rremove("x.text"),
+                      rr_ten + rremove("xlab")  + rremove("x.text"),
                       rd_ten,
                       ncol=1,
                       align="v")
 
-mn_ten
-diff_ten
-
 # 8.5. Save plots
-ggsave(paste0(workdir,"Results/s7-incidence-risk-ten-percent.tiff"),
-       mn_ten,
-       width = 2400,
-       height = 1200,
-       units = "px")
+# ggsave(paste0(workdir,"Results/s7-incidence-risk-ten-percent.tiff"),
+#        mn_ten,
+#        width = 2400,
+#        height = 1200,
+#        units = "px")
 
-ggsave(paste0(workdir,"Results/s8-differences-ten-percent.tiff"),
+ggsave(paste0(workdir,"Results/s4-combined-ten-percent.tiff"),
        diff_ten,
-       width = 2400,
-       height = 2200,
-       units = "px")
+       width = 16,
+       height = 20,
+       units = "cm")
 
 ######################################################################################
 # 9. Stratified analysis
@@ -420,7 +481,7 @@ mn_strat <- ggplot(res_mn_strat,aes(x=num, y=est, label=label, fill=educ, colour
   geom_point(position=pd, size=3, shape=20) +
   geom_text(aes(y = est + offset), position=pd, size=2.5) +
   xlab("Number of waves meeting recommendations") +
-  ylab("Incidence-risk of obesity") +
+  ylab("Incidence-risk") +
   expand_limits(y=c(0, 0.3)) +
   scale_y_continuous(breaks=seq(0, 0.3, by = 0.05), expand = c(0, 0), labels = scales::percent) +
   scale_x_continuous(breaks=seq(0, 7, by = 1)) +
@@ -459,26 +520,24 @@ rd_strat <- ggplot(res_rd_strat,aes(x=num, y=est, label=label, fill=educ, colour
   figure_theme + theme(legend.position="bottom",legend.title=element_blank())
 
 # 9.4. Combined difference plot
-diff_strat <- ggarrange(rr_strat  + rremove("xlab")  + rremove("x.text")  + rremove("legend"),
+diff_strat <- ggarrange(mn_strat + rremove("xlab")  + rremove("x.text") + rremove("legend"),
+                        rr_strat + rremove("xlab")  + rremove("x.text") + rremove("legend"),
                         rd_strat,
                         ncol=1,
                         align="v")
 
-mn_strat
-diff_strat
-
 # 9.5. Save plots
-ggsave(paste0(workdir,"Results/s9-incidence-risk-stratified.tiff"),
-       mn_strat,
-       width = 2400,
-       height = 1200,
-       units = "px")
+# ggsave(paste0(workdir,"Results/s9-incidence-risk-stratified.tiff"),
+#        mn_strat,
+#        width = 2400,
+#        height = 1200,
+#        units = "px")
 
-ggsave(paste0(workdir,"Results/s10-differences-stratified.tiff"),
+ggsave(paste0(workdir,"Results/s5-combined-stratified.tiff"),
        diff_strat,
-       width = 2400,
-       height = 2200,
-       units = "px")
+       width = 16,
+       height = 20,
+       units = "cm")
 
 ######################################################################################
 # 10. Sensitivity analysis 1 - Descendent adjustment
@@ -491,7 +550,7 @@ mn_sns1 <- ggplot(res_mn_sns1,aes(x=num, y=est, label=label)) +
   geom_point(position=pd, size=3, shape=20, colour="darkblue") +
   geom_text(hjust = 0.5, nudge_y = -0.01, nudge_x = 0, size=2.5) +
   xlab("Number of waves meeting recommendations") +
-  ylab("Incidence-risk of obesity") +
+  ylab("Incidence-risk") +
   expand_limits(y=c(0, 0.2)) +
   scale_y_continuous(breaks=seq(0, 0.2, by = 0.05), expand = c(0, 0), labels = scales::percent) +
   scale_x_continuous(breaks=seq(0, 7, by = 1)) +
@@ -524,26 +583,24 @@ rd_sns1 <- ggplot(res_rd_sns1,aes(x=num, y=est, label=label)) +
   figure_theme
 
 # 10.4. Combined difference plot
-diff_sns1 <- ggarrange(rr_sns1  + rremove("xlab")  + rremove("x.text"),
+diff_sns1 <- ggarrange(mn_sns1 + rremove("xlab")  + rremove("x.text"),
+                       rr_sns1 + rremove("xlab")  + rremove("x.text"),
                        rd_sns1,
                        ncol=1,
                        align="v")
 
-mn_sns1
-diff_sns1
-
 # 10.5. Save plots
-ggsave(paste0(workdir,"Results/s11-incidence-risk-sens1.tiff"),
-       mn_sns1,
-       width = 2400,
-       height = 1200,
-       units = "px")
+# ggsave(paste0(workdir,"Results/s11-incidence-risk-sens1.tiff"),
+#        mn_sns1,
+#        width = 2400,
+#        height = 1200,
+#        units = "px")
 
-ggsave(paste0(workdir,"Results/s12-differences-sens1.tiff"),
+ggsave(paste0(workdir,"Results/s6-combined-descendant.tiff"),
        diff_sns1,
-       width = 2400,
-       height = 2200,
-       units = "px")
+       width = 16,
+       height = 20,
+       units = "cm")
 
 ######################################################################################
 # 11. Sensitivity analysis 2 - Omitting wholly imputed variables
@@ -556,7 +613,7 @@ mn_sns2 <- ggplot(res_mn_sns2,aes(x=num, y=est, label=label)) +
   geom_point(position=pd, size=3, shape=20, colour="darkblue") +
   geom_text(hjust = 0.5, nudge_y = -0.01, nudge_x = 0, size=2.5) +
   xlab("Number of waves meeting recommendations") +
-  ylab("Incidence-risk of obesity") +
+  ylab("Incidence-risk") +
   expand_limits(y=c(0, 0.2)) +
   scale_y_continuous(breaks=seq(0, 0.2, by = 0.05), expand = c(0, 0), labels = scales::percent) +
   scale_x_continuous(breaks=seq(0, 7, by = 1)) +
@@ -589,24 +646,64 @@ rd_sns2 <- ggplot(res_rd_sns2,aes(x=num, y=est, label=label)) +
   figure_theme
 
 # 11.4. Combined difference plot
-diff_sns2 <- ggarrange(rr_sns2  + rremove("xlab")  + rremove("x.text"),
+diff_sns2 <- ggarrange(mn_sns2 + rremove("xlab")  + rremove("x.text"),
+                       rr_sns2 + rremove("xlab")  + rremove("x.text"),
                        rd_sns2,
                        ncol=1,
                        align="v")
 
-mn_sns2
-diff_sns2
-
 # 11.5. Save plots
-ggsave(paste0(workdir,"Results/s13-incidence-risk-sens2.tiff"),
-       mn_sns2,
-       width = 2400,
-       height = 1200,
-       units = "px")
+# ggsave(paste0(workdir,"Results/s13-incidence-risk-sens2.tiff"),
+#        mn_sns2,
+#        width = 2400,
+#        height = 1200,
+#        units = "px")
 
-ggsave(paste0(workdir,"Results/s14-differences-sens2.tiff"),
+ggsave(paste0(workdir,"Results/s7-combined-drop-imputed.tiff"),
        diff_sns2,
-       width = 2400,
-       height = 2200,
-       units = "px")
+       width = 16,
+       height = 20,
+       units = "cm")
 
+######################################################################################
+# 12. Sensitivity analysis 2 - Omitting wholly imputed variables
+#-------------------------------------------------------------------------------------
+
+# 11.1 Mean
+mn_bmi <- ggplot(res_mn_bmi,aes(x=num, y=est, label=label)) +
+  geom_ribbon(aes(ymin=lb, ymax=ub), alpha=0.3, fill="darkblue") +
+  geom_line(position=pd, colour="darkblue") +
+  geom_point(position=pd, size=3, shape=20, colour="darkblue") +
+  geom_text(hjust = 0.5, nudge_y = -2.5, nudge_x = 0, size=2.5) +
+  xlab("Number of waves meeting recommendations") +
+  ylab("Mean") +
+  expand_limits(y=c(0, 30)) +
+  scale_y_continuous(breaks=seq(0, 30, by = 5), expand = c(0, 0)) +
+  scale_x_continuous(breaks=seq(0, 7, by = 1)) +
+  figure_theme
+
+# 11.3. Mean difference
+md_bmi <- ggplot(res_md_bmi,aes(x=num, y=est, label=label)) +
+  geom_ribbon(aes(ymin=lb, ymax=ub), alpha=0.3, fill="darkblue") +
+  geom_line(position=pd, colour="darkblue") +
+  geom_point(position=pd, size=3, shape=20, colour="darkblue") +
+  geom_text(hjust = 0.5, nudge_y = -0.15, nudge_x = 0, size=2.5) +
+  xlab("Number of waves meeting recommendations") +
+  ylab("Mean difference") +
+  expand_limits(y=c(-0.4, 1.4)) +
+  scale_y_continuous(breaks=seq(-0.4, 1.4, by = 0.4), expand = c(0, 0)) +
+  scale_x_continuous(breaks=seq(0, 7, by = 1)) +
+  figure_theme
+
+# 11.4. Combined difference plot
+comb_bmi <- ggarrange(mn_bmi + rremove("xlab")  + rremove("x.text"),
+                      md_bmi,
+                      ncol=1,
+                      align="v")
+comb_bmi
+
+ggsave(paste0(workdir,"Results/s8-post-hoc-bmi.tiff"),
+       comb_bmi,
+       width = 16,
+       height = 14,
+       units = "cm")

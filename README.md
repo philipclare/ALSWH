@@ -58,30 +58,33 @@ Code for all analysis in the article examining the causal effects of physical ac
 
 | Description | R Code |
 | --- | --- |
-| 1 - Data extraction - pull relevant variables from each wave | [Data extraction](Code/2025c/1_Data_extraction.R) |
-| 2 - Merge data - merge waves and create derived variables | [Merge data](Code/2025c/2_Data_merge.R) |
-| 3a - Multiple imputation - impute intermittent missing data | [Imputation](Code/2025c/3a_Multiple_imputation.R) |
-| 3b - Multiple imputation for sensitivity analysis | [Imputation](Code/2025c/3b_Multiple_imputation_sensitivity.R) |
-| 4 - Final data creation - finalise imputed data and structure for analysis | [Finalise data](Code/2025c/4_Data_finalise.R) |
-| 5a - Linearity tests for functional form of PA in primary analysis | [Primary linearity](Code/2025c/5a_Primary_linearity.R) |
-| 5b - Linearity tests for functional form of PA in categorical analysis | [Categorical linearity](Code/2025c/5b_Categorical_linearity.R) |
-| 5c - Linearity tests for functional form of PA in analysis of 'severe' obesity | [Severe linearity](Code/2025c/5c_Severe_obesity_linearity.R) |
-| 5d - Linearity tests for functional form of PA in analysis of five-percent weight gain | [Five-percent linearity](Code/2025c/5d_Five_percent_weight_gain_linearity.R) |
-| 5e - Linearity tests for functional form of PA in analysis of ten-percent weight gain | [Ten-percent linearity](Code/2025c/5e_Ten_percent_weight_gain_linearity.R) |
-| 5f - Combine and summarise linearity tests | [Combine linearity](Code/2025c/5f_Summarise_linearity_results.R) |
-| 6a - Primary analysis | [Primary analysis](Code/2025c/6a_Primary_analysis.R) |
-| 6b - Categorical analysis | [Categorical analysis](Code/2025c/6b_Categorical_analysis.R) |
-| 6c - Analysis of 'severe' obesity | [Severe analysis](Code/2025c/6c_Severe_obesity_outcome_analysis.R) |
-| 6d - Analysis of five-percent weight gain | [Five-percent analysis](Code/2025c/6d_Five_percent_weight_gain_analysis.R) |
-| 6e - Analysis of ten-percent weight gain | [Ten-percent analysis](Code/2025c/6e_Ten_percent_weight_gain_analysis.R) |
-| 6f - Secondary analysis stratified by level of education | [Stratified analysis](Code/2025c/6f_Secondary_analysis_stratified.R) |
-| 6g - Sensitivity analysis controlling for descendants of possible unmeasured confounder | [Sensitivity analysis 1](Code/2025c/6g_Sensitivity_analysis_descendent_adjustment.R) |
-| 6h - Sensitivity analysis excluding variables that were wholly imputed in some waves | [Sensitivity analysis 2](Code/2025c/6h_Sensitivity_analysis_excluding_imputed.R) |
-| 7 - Pool results across imputations and create analysis figures | [Pool results](Code/2025c/7_Pool_results.R) |
-| 8 - Create plots to graphically report the analysis findings | [Create plots](Code/2025c/8_Create_plots.R) |
-| 9 - Socio-demographic descriptives for Table 1 and on unadjusted incidence of outcomes. | [Sociodemographic descriptives](Code/2025c/9_Descriptive_statistics.R) |
-| 10 - E-Value analysis of unmeasured confounding | [EValue analysis](Code/2025c/10_EValue_analysis.R) |
-| 11 - Missing data summary for appendix | [Missing data](Code/2025c/11_Missing_data_summary.R) |
+| 1 - Data extraction - pull relevant variables from each wave | [Data extraction](Code/2026/1_Data_extraction.R) |
+| 2 - Merge data - merge waves and create derived variables | [Merge data](Code/2026/2_Data_merge.R) |
+| 3a - Multiple imputation - impute intermittent missing data | [Imputation](Code/2026/3a_Multiple_imputation.R) |
+| 3b - Multiple imputation for sensitivity analysis | [Imputation](Code/2026/3b_Multiple_imputation_sensitivity.R) |
+| 4 - Final data creation - finalise imputed data and structure for analysis | [Finalise data](Code/2026/4_Data_finalise.R) |
+| 5a - Linearity tests for functional form of PA in primary analysis | [Primary linearity](Code/2026/5a_Primary_linearity.R) |
+| 5b - Linearity tests for functional form of PA in categorical analysis | [Categorical linearity](Code/2026/5b_Categorical_linearity.R) |
+| 5c - Linearity tests for functional form of PA in analysis of 'severe' obesity | [Severe linearity](Code/2026/5c_Severe_obesity_linearity.R) |
+| 5d - Linearity tests for functional form of PA in analysis of five-percent weight gain | [Five-percent linearity](Code/2026/5d_Five_percent_weight_gain_linearity.R) |
+| 5e - Linearity tests for functional form of PA in analysis of ten-percent weight gain | [Ten-percent linearity](Code/2026/5e_Ten_percent_weight_gain_linearity.R) |
+| 5e - Linearity tests for post-hoc analysis of continuous BMI | [BMI linearity](Code/2026/5f_Post-hoc_bmi_linearity.R) |
+| 5g - Combine and summarise linearity tests | [Combine linearity](Code/2026/5g_Summarise_linearity_results.R) |
+| 6a - Primary analysis | [Primary analysis](Code/2026/6a_Primary_analysis.R) |
+| 6b - Categorical analysis | [Categorical analysis](Code/2026/6b_Categorical_analysis.R) |
+| 6c - Analysis of 'severe' obesity | [Severe analysis](Code/2026/6c_Severe_obesity_outcome_analysis.R) |
+| 6d - Analysis of five-percent weight gain | [Five-percent analysis](Code/2026/6d_Five_percent_weight_gain_analysis.R) |
+| 6e - Analysis of ten-percent weight gain | [Ten-percent analysis](Code/2026/6e_Ten_percent_weight_gain_analysis.R) |
+| 6f - Secondary analysis stratified by level of education | [Stratified analysis](Code/2026/6f_Secondary_analysis_stratified.R) |
+| 6g - Sensitivity analysis controlling for descendants of possible unmeasured confounder | [Sensitivity analysis 1](Code/2026/6g_Sensitivity_analysis_descendent_adjustment.R) |
+| 6h - Sensitivity analysis excluding variables that were wholly imputed in some waves | [Sensitivity analysis 2](Code/2026/6h_Sensitivity_analysis_excluding_imputed.R) |
+| 6i - Post-hoc sensitivity analysis of continuous BMI | [Sensitivity analysis 3](Code/2026/6i_Post-hoc_bmi.R) |
+| 6j - Post-hoc analysis using 'natural course' | [Natural course analysis](Code/2026/6j_Post-hoc_natural_regime.R) |
+| 7 - Pool results across imputations and create analysis figures | [Pool results](Code/2026/7_Pool_results.R) |
+| 8 - Create plots to graphically report the analysis findings | [Create plots](Code/2026/8_Create_plots.R) |
+| 9 - Socio-demographic descriptives for Table 1 and on unadjusted incidence of outcomes. | [Sociodemographic descriptives](Code/2026/9_Descriptive_statistics.R) |
+| 10 - E-Value analysis of unmeasured confounding | [EValue analysis](Code/2026/10_EValue_analysis.R) |
+| 11 - Missing data summary for appendix | [Missing data](Code/2026/11_Missing_data_summary.R) |
 
 1. Lendle SD, Schwab J, Petersen ML, van der Laan MJ. ltmle: An R Package Implementing Targeted Minimum Loss-Based Estimation for Longitudinal Data. Journal of Statistical Software. 2017;81(1):1-21.
 2. Vermunt JK. Latent Class Modeling with Covariates: Two Improved Three-Step Approaches. Political Analysis. 2010;18(4):450-469.

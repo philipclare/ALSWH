@@ -149,6 +149,35 @@ get_res_cat <- function (summary) {
   list(pr_150,rr_150,rd_150,pr_300,rr_300,rd_300)
 }
 
+get_res_cont <- function (summary) {
+  
+  n <- summary[[3]]
+  sum <- summary[[1]]
+  cov.mat_ic <- summary[[2]] / n
+  
+  min.y <- summary[[4]]
+  max.y <- summary[[5]]
+  
+  rownames(cov.mat_ic) <- colnames(cov.mat_ic) <- rownames(sum$cmat)
+  
+  coef <- setNames(sum$cmat[,1], rownames(sum$cmat))
+  
+  pr <- do.call(rbind,lapply(seq(0,7), function (x) {
+    car::deltaMethod(coef,"(exp(Intercept+x*cum_exp)/(1+exp((Intercept)+x*cum_exp)))*(max.y-min.y)+min.y",vcov=cov.mat_ic)
+  }))
+  
+  pr
+  
+  md <- do.call(rbind,lapply(seq(0,7), function (x) {
+    car::deltaMethod(coef,"((exp(Intercept+x*cum_exp)/(1+exp((Intercept)+x*cum_exp)))*(max.y-min.y)+min.y) - 
+                     ((exp(Intercept+7*cum_exp)/(1+exp((Intercept)+7*cum_exp)))*(max.y-min.y)+min.y)",vcov=cov.mat_ic)
+  }))
+  
+  md
+  
+  list(pr,md)
+}
+
 meld_res <- function(res_list) {
   res <- t(do.call(rbind,mi.meld(q = res_list[,c(1:8)],
                                         se = res_list[,c(9:16)])))
@@ -167,7 +196,7 @@ meld_res <- function(res_list) {
 # 2.1 Load saved results
 sum_pr <- lapply(seq(1,25), function (x) {
   res <- readRDS(paste0(workdir,"Results/Katana Output/ltmle-bin-summary-",x,".rds")) 
-  res[[5]] <- nrow(readRDS(paste0(workdir,"Data/primary analysis data - 20240827.rds"))[[x]])
+  res[[2]] <- nrow(readRDS(paste0(workdir,"Data/primary analysis data - 20240827.rds"))[[x]])
   res
 })
 
@@ -188,8 +217,22 @@ rd_pr <- do.call(rbind,lapply(res_pr, function (x) {
   input <- c(as.vector(input[,1]),as.vector(input[,2]))
 }))
 
+# natural_pr <- do.call(rbind,(lapply(seq(1,25), function (x) {
+#   res <- readRDS(paste0(workdir,"Results/Katana Output/natural-summary-pr-",x,".rds")) 
+#   c(res$treatment$estimate,res$treatment$std.dev)
+# })))
+# natural_meld <- data.frame(do.call(cbind,mi.meld(q=matrix(natural_pr[,1],ncol=1),se=matrix(natural_pr[,2],ncol=1))))
+# colnames(natural_meld) <- c("est","se")
+# natural_meld$num <- 8
+# natural_meld$lb <- natural_meld$est-(qnorm(0.9975)*natural_meld$se)
+# natural_meld$ub <- natural_meld$est+(qnorm(0.9975)*natural_meld$se)
+# natural_meld$group <- "natural"
+
 # 2.2 Combine and restructure results for figures
 res_mn_pr <- meld_res(mn_pr)
+res_mn_pr$group <- "primary"
+
+res_mn_pr <- rbind(res_mn_pr,natural_meld)
 res_mn_pr$label <- paste0(sprintf('%.1f%%',res_mn_pr$est*100),"\n(",sprintf('%.1f%%',res_mn_pr$lb*100),", ",sprintf('%.1f%%',res_mn_pr$ub*100),")")
 
 res_rr_pr <- meld_res(rr_pr)
@@ -535,7 +578,39 @@ res_rd_sns2 <- meld_res(rd_sns2)
 res_rd_sns2$label <- paste0(sprintf('%.1f%%',res_rd_sns2$est*100),"\n(",sprintf('%.1f%%',res_rd_sns2$lb*100),", ",sprintf('%.1f%%',res_rd_sns2$ub*100),")")
 
 ######################################################################################
-# 10. Save results
+# 10. Post-hoc analysis of BMI
+#-------------------------------------------------------------------------------------
+
+# 10.1 Load saved results
+sum_bmi <- lapply(seq(1,25), function (x) {
+  res <- readRDS(paste0(workdir,"Results/Katana Output/ltmle-bmi-summary-",x,".rds")) 
+  res[[3]] <- nrow(readRDS(paste0(workdir,"Data/posthoc bmi analysis data - 20260304.rds"))[[x]])
+  res[[4]] <- min(readRDS(paste0(workdir,"Data/posthoc bmi analysis data - 20260304.rds"))[[x]]$bmi10)
+  res[[5]] <- max(readRDS(paste0(workdir,"Data/posthoc bmi analysis data - 20260304.rds"))[[x]]$bmi10)
+  res
+})
+
+res_bmi <- lapply(sum_bmi,get_res_cont)
+
+mn_bmi <- do.call(rbind,lapply(res_bmi, function (x) {
+  input <- x[[1]]
+  input <- c(as.vector(input[,1]),as.vector(input[,2]))
+}))
+
+md_bmi <- do.call(rbind,lapply(res_bmi, function (x) {
+  input <- x[[2]]
+  input <- c(as.vector(input[,1]),as.vector(input[,2]))
+}))
+
+# 10.2 Combine and restructure results for figures
+res_mn_bmi <- meld_res(mn_bmi)
+res_mn_bmi$label <- paste0(sprintf('%.1f',res_mn_bmi$est),"\n(",sprintf('%.1f',res_mn_bmi$lb),", ",sprintf('%.1f',res_mn_bmi$ub),")")
+
+res_md_bmi <- meld_res(md_bmi)
+res_md_bmi$label <- paste0(sprintf('%.1f',res_md_bmi$est),"\n(",sprintf('%.1f',res_md_bmi$lb),", ",sprintf('%.1f',res_md_bmi$ub),")")
+
+######################################################################################
+# 11. Save results
 #-------------------------------------------------------------------------------------
 
 saveRDS(res_mn_pr,file=paste0(workdir,"Results/Processed/means - binary.rds"))
@@ -569,6 +644,9 @@ saveRDS(res_rd_sns1,file=paste0(workdir,"Results/Processed/rds - sensitivity 1 -
 saveRDS(res_mn_sns2,file=paste0(workdir,"Results/Processed/means - sensitivity 2 - drop fully imputed.rds"))
 saveRDS(res_rr_sns2,file=paste0(workdir,"Results/Processed/rrs - sensitivity 2 - drop fully imputed.rds"))
 saveRDS(res_rd_sns2,file=paste0(workdir,"Results/Processed/rds - sensitivity 2 - drop fully imputed.rds"))
+
+saveRDS(res_mn_bmi,file=paste0(workdir,"Results/Processed/means - bmi analysis.rds"))
+saveRDS(res_md_bmi,file=paste0(workdir,"Results/Processed/mds - bmi analysis.rds"))
 
 ######################################################################################
 # 11. Save summary output to excel for tables

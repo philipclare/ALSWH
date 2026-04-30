@@ -203,11 +203,11 @@ imp <- lapply(imp,function (x) {
                              marital_29,marital_39,age9,ariapgp_29,ariapgp_39,employ9,seifadis_29,seifadis_39,seifadis_49,seifadis_59,live_u189,live_o189,
                              heartdis_3yr9,stroke_3yr9,cancer_3yr9,arthritis_3yr9,depression_3yr9,anxiety_3yr9,
                              cesd109,mnstrs9,vegetables9,fruit9,alcliferisk9,alcepisrisk9,smokst_29,smokst_39,
-                             menopause_29,menopause_39,hrt9,pcsa9,mcsa9,sleep_prob9,finfinc9,bmi9,
+                             menopause_29,menopause_39,hrt9,pcsa9,mcsa9,sleep_prob9,finfinc9,
                              marital_210,marital_310,age10,ariapgp_210,ariapgp_310,employ10,seifadis_210,seifadis_310,seifadis_410,seifadis_510,live_u1810,live_o1810,
                              heartdis_3yr10,stroke_3yr10,cancer_3yr10,arthritis_3yr10,depression_3yr10,anxiety_3yr10,
                              cesd1010,mnstrs10,vegetables10,fruit10,alcliferisk10,alcepisrisk10,smokst_210,smokst_310,
-                             menopause_210,menopause_310,hrt10,pcsa10,mcsa10,sleep_prob10,finfinc10,bmi10,
+                             menopause_210,menopause_310,hrt10,pcsa10,mcsa10,sleep_prob10,finfinc10,
                              activity_bin10,activity_cat_110,activity_cat_210))
   x
   
@@ -286,11 +286,11 @@ imp_sens <- lapply(imp_sens,function (x) {
                              marital_29,marital_39,age9,ariapgp_29,ariapgp_39,employ9,seifadis_29,seifadis_39,seifadis_49,seifadis_59,live_u189,live_o189,
                              heartdis_3yr9,stroke_3yr9,cancer_3yr9,arthritis_3yr9,depression_3yr9,anxiety_3yr9,
                              cesd109,mnstrs9,vegetables9,fruit9,alcliferisk9,alcepisrisk9,smokst_29,smokst_39,
-                             menopause_29,menopause_39,hrt9,pcsa9,mcsa9,sleep_prob9,finfinc9,bmi9,
+                             menopause_29,menopause_39,hrt9,pcsa9,mcsa9,sleep_prob9,finfinc9,
                              marital_210,marital_310,age10,ariapgp_210,ariapgp_310,employ10,seifadis_210,seifadis_310,seifadis_410,seifadis_510,live_u1810,live_o1810,
                              heartdis_3yr10,stroke_3yr10,cancer_3yr10,arthritis_3yr10,depression_3yr10,anxiety_3yr10,
                              cesd1010,mnstrs10,vegetables10,fruit10,alcliferisk10,alcepisrisk10,smokst_210,smokst_310,
-                             menopause_210,menopause_310,hrt10,pcsa10,mcsa10,sleep_prob10,finfinc10,bmi10,
+                             menopause_210,menopause_310,hrt10,pcsa10,mcsa10,sleep_prob10,finfinc10,
                              activity_bin10,activity_cat_110,activity_cat_210))
   x
   
@@ -306,7 +306,8 @@ imp_primary <- lapply(imp, function (x) {
                            activity_cat_23,activity_cat_24,activity_cat_25,activity_cat_26,activity_cat_27,activity_cat_28,activity_cat_29,
                            obesity_sev4,obesity_sev5,obesity_sev6,obesity_sev7,obesity_sev8,obesity_sev9,obesity_sev10,
                            weight_gain_a4,weight_gain_a5,weight_gain_a6,weight_gain_a7,weight_gain_a8,weight_gain_a9,weight_gain_a10,
-                           weight_gain_b4,weight_gain_b5,weight_gain_b6,weight_gain_b7,weight_gain_b8,weight_gain_b9,weight_gain_b10))
+                           weight_gain_b4,weight_gain_b5,weight_gain_b6,weight_gain_b7,weight_gain_b8,weight_gain_b9,weight_gain_b10,
+                           bmi9,bmi10))
   x
   
 })
@@ -316,7 +317,8 @@ imp_cat <- lapply(imp, function (x) {
   x <- subset(x, select=-c(activity_bin3,activity_bin4,activity_bin5,activity_bin6,activity_bin7,activity_bin8,activity_bin9,
                            obesity_sev4,obesity_sev5,obesity_sev6,obesity_sev7,obesity_sev8,obesity_sev9,obesity_sev10,
                            weight_gain_a4,weight_gain_a5,weight_gain_a6,weight_gain_a7,weight_gain_a8,weight_gain_a9,weight_gain_a10,
-                           weight_gain_b4,weight_gain_b5,weight_gain_b6,weight_gain_b7,weight_gain_b8,weight_gain_b9,weight_gain_b10))
+                           weight_gain_b4,weight_gain_b5,weight_gain_b6,weight_gain_b7,weight_gain_b8,weight_gain_b9,weight_gain_b10,
+                           bmi9,bmi10))
   x
   
 })
@@ -327,7 +329,8 @@ imp_sevob <- lapply(imp, function (x) {
                            activity_cat_23,activity_cat_24,activity_cat_25,activity_cat_26,activity_cat_27,activity_cat_28,activity_cat_29,
                            obesity4,obesity5,obesity6,obesity7,obesity8,obesity9,obesity10,
                            weight_gain_a4,weight_gain_a5,weight_gain_a6,weight_gain_a7,weight_gain_a8,weight_gain_a9,weight_gain_a10,
-                           weight_gain_b4,weight_gain_b5,weight_gain_b6,weight_gain_b7,weight_gain_b8,weight_gain_b9,weight_gain_b10))
+                           weight_gain_b4,weight_gain_b5,weight_gain_b6,weight_gain_b7,weight_gain_b8,weight_gain_b9,weight_gain_b10,
+                           bmi9,bmi10))
   
   x <- x %>%
     dplyr::rename(
@@ -350,7 +353,8 @@ imp_gaina <- lapply(imp, function (x) {
                            activity_cat_23,activity_cat_24,activity_cat_25,activity_cat_26,activity_cat_27,activity_cat_28,activity_cat_29,
                            obesity4,obesity5,obesity6,obesity7,obesity8,obesity9,obesity10,
                            obesity_sev4,obesity_sev5,obesity_sev6,obesity_sev7,obesity_sev8,obesity_sev9,obesity_sev10,
-                           weight_gain_b4,weight_gain_b5,weight_gain_b6,weight_gain_b7,weight_gain_b8,weight_gain_b9,weight_gain_b10))
+                           weight_gain_b4,weight_gain_b5,weight_gain_b6,weight_gain_b7,weight_gain_b8,weight_gain_b9,weight_gain_b10,
+                           bmi9,bmi10))
   
   x <- x %>%
     dplyr::rename(
@@ -373,7 +377,8 @@ imp_gainb <- lapply(imp, function (x) {
                            activity_cat_23,activity_cat_24,activity_cat_25,activity_cat_26,activity_cat_27,activity_cat_28,activity_cat_29,
                            obesity4,obesity5,obesity6,obesity7,obesity8,obesity9,obesity10,
                            obesity_sev4,obesity_sev5,obesity_sev6,obesity_sev7,obesity_sev8,obesity_sev9,obesity_sev10,
-                           weight_gain_a4,weight_gain_a5,weight_gain_a6,weight_gain_a7,weight_gain_a8,weight_gain_a9,weight_gain_a10))
+                           weight_gain_a4,weight_gain_a5,weight_gain_a6,weight_gain_a7,weight_gain_a8,weight_gain_a9,weight_gain_a10,
+                           bmi9,bmi10))
   
   x <- x %>%
     dplyr::rename(
@@ -396,7 +401,8 @@ imp_sens_adj <- lapply(imp_sens, function (x) {
                            activity_cat_23,activity_cat_24,activity_cat_25,activity_cat_26,activity_cat_27,activity_cat_28,activity_cat_29,
                            obesity_sev4,obesity_sev5,obesity_sev6,obesity_sev7,obesity_sev8,obesity_sev9,obesity_sev10,
                            weight_gain_a4,weight_gain_a5,weight_gain_a6,weight_gain_a7,weight_gain_a8,weight_gain_a9,weight_gain_a10,
-                           weight_gain_b4,weight_gain_b5,weight_gain_b6,weight_gain_b7,weight_gain_b8,weight_gain_b9,weight_gain_b10))
+                           weight_gain_b4,weight_gain_b5,weight_gain_b6,weight_gain_b7,weight_gain_b8,weight_gain_b9,weight_gain_b10,
+                           bmi9,bmi10))
   x
   
 })
@@ -407,7 +413,8 @@ imp_strat <- lapply(imp, function (x) {
                            activity_cat_23,activity_cat_24,activity_cat_25,activity_cat_26,activity_cat_27,activity_cat_28,activity_cat_29,
                            obesity_sev4,obesity_sev5,obesity_sev6,obesity_sev7,obesity_sev8,obesity_sev9,obesity_sev10,
                            weight_gain_a4,weight_gain_a5,weight_gain_a6,weight_gain_a7,weight_gain_a8,weight_gain_a9,weight_gain_a10,
-                           weight_gain_b4,weight_gain_b5,weight_gain_b6,weight_gain_b7,weight_gain_b8,weight_gain_b9,weight_gain_b10))
+                           weight_gain_b4,weight_gain_b5,weight_gain_b6,weight_gain_b7,weight_gain_b8,weight_gain_b9,weight_gain_b10,
+                           bmi9,bmi10))
   
   x1 <- x[which(x$b_educ_2==0 & x$b_educ_3==0),]
   x1 <- subset(x1, select=-c(b_educ_2,b_educ_3))
@@ -418,6 +425,18 @@ imp_strat <- lapply(imp, function (x) {
   
 })
 
+imp_bmi <- lapply(imp, function (x) {
+  
+  x <- subset(x, select=-c(activity_cat_13,activity_cat_14,activity_cat_15,activity_cat_16,activity_cat_17,activity_cat_18,activity_cat_19,
+                           activity_cat_23,activity_cat_24,activity_cat_25,activity_cat_26,activity_cat_27,activity_cat_28,activity_cat_29,
+                           obesity4,obesity5,obesity6,obesity7,obesity8,obesity9,obesity10,
+                           obesity_sev4,obesity_sev5,obesity_sev6,obesity_sev7,obesity_sev8,obesity_sev9,obesity_sev10,
+                           weight_gain_a4,weight_gain_a5,weight_gain_a6,weight_gain_a7,weight_gain_a8,weight_gain_a9,weight_gain_a10,
+                           weight_gain_b4,weight_gain_b5,weight_gain_b6,weight_gain_b7,weight_gain_b8,weight_gain_b9,weight_gain_b10,
+                           bmi9))
+  x
+  
+})
 
 ######################################################################################
 # 7. Save final, analysis-ready dataset
@@ -430,3 +449,4 @@ saveRDS(imp_gaina,file=paste0(workdir,"Data/weight gain a analysis data - 202408
 saveRDS(imp_gainb,file=paste0(workdir,"Data/weight gain b analysis data - 20240827.rds"))
 saveRDS(imp_strat,file=paste0(workdir,"Data/stratified analysis data - 20250606.rds"))
 saveRDS(imp_sens_adj,file=paste0(workdir,"Data/sensitivity analysis data - 20250606.rds"))
+saveRDS(imp_bmi,file=paste0(workdir,"Data/posthoc bmi analysis data - 20260304.rds"))

@@ -33,7 +33,7 @@ if (any(missing)) {
 lapply(libs, library, character.only = TRUE)
 
 ######################################################################################
-# 2. Pool and get lowest AIC
+# 2. Primary analysis - Pool and get lowest AIC
 #-------------------------------------------------------------------------------------
 
 names_pr <- list.files(paste0(workdir,"Results/Katana Output/Linearity/"), pattern = "bin*", recursive = TRUE, full.names = TRUE)
@@ -48,7 +48,7 @@ paste0("For the primary analysis, based on AIC the best fitting model is: ",fit_
 paste0("For the primary analysis, based on BIC the best fitting model is: ",fit_pr$V1[which(fit_pr$V3==min(fit_pr$V3))])
 
 ######################################################################################
-# 3. Pool and get lowest AIC
+# 3. Categorical analysis - Pool and get lowest AIC
 #-------------------------------------------------------------------------------------
 
 names_cat <- list.files(paste0(workdir,"Results/Katana Output/Linearity/"), pattern = "cat*", recursive = TRUE, full.names = TRUE)
@@ -62,7 +62,7 @@ paste0("For the categorical analysis, based on AIC the best fitting model is: ",
 paste0("For the categorical analysis, based on BIC the best fitting model is: ",fit_cat$V1[which(fit_cat$V3==min(fit_cat$V3))])
 
 ######################################################################################
-# 4. Pool and get lowest AIC
+# 4. Severe obesity analysis - Pool and get lowest AIC
 #-------------------------------------------------------------------------------------
 
 names_sev <- list.files(paste0(workdir,"Results/Katana Output/Linearity/"), pattern = "sev*", recursive = TRUE, full.names = TRUE)
@@ -76,7 +76,7 @@ paste0("For the analysis of severe obesity, based on AIC the best fitting model 
 paste0("For the analysis of severe obesity, based on BIC the best fitting model is: ",fit_sev$V1[which(fit_sev$V3==min(fit_sev$V3))])
 
 ######################################################################################
-# 5. Pool and get lowest AIC
+# 5. Five percent increase in weight analysis - Pool and get lowest AIC
 #-------------------------------------------------------------------------------------
 
 names_five <- list.files(paste0(workdir,"Results/Katana Output/Linearity/"), pattern = "five*", recursive = TRUE, full.names = TRUE)
@@ -90,7 +90,7 @@ paste0("For the analysis of 5% weight gain, based on AIC the best fitting model 
 paste0("For the analysis of 5% weight gain, based on BIC the best fitting model is: ",fit_five$V1[which(fit_five$V3==min(fit_five$V3))])
 
 ######################################################################################
-# 6. Pool and get lowest AIC
+# 6. Ten percent increase in weight analysis - Pool and get lowest AIC
 #-------------------------------------------------------------------------------------
 
 names_ten <- list.files(paste0(workdir,"Results/Katana Output/Linearity/"), pattern = "ten*", recursive = TRUE, full.names = TRUE)
@@ -104,6 +104,18 @@ paste0("For the analysis of 10% weight gain, based on AIC the best fitting model
 paste0("For the analysis of 10% weight gain, based on BIC the best fitting model is: ",fit_ten$V1[which(fit_ten$V3==min(fit_ten$V3))])
 
 ######################################################################################
+# 7. Continuous BMI analysis - Pool and get lowest AIC
+#-------------------------------------------------------------------------------------
+
+fit_cont <- readRDS(file=paste0(workdir,"Results/fit/bmi_linearity.rds"))
+
+fit_cont$V2 <- as.numeric(fit_cont$V2)
+fit_cont$V3 <- as.numeric(fit_cont$V3)
+
+paste0("For the analysis of continuous BMI, based on AIC the best fitting model is: ",fit_cont$V1[which(fit_cont$V2==min(fit_cont$V2))])
+paste0("For the analysis of continuous BMI, based on BIC the best fitting model is: ",fit_cont$V1[which(fit_cont$V3==min(fit_cont$V3))])
+
+######################################################################################
 # 7. Save results to excel for tables
 #-------------------------------------------------------------------------------------
 
@@ -114,11 +126,13 @@ addWorksheet(wb,"Categorical")
 addWorksheet(wb,"Severe")
 addWorksheet(wb,"Five_percent")
 addWorksheet(wb,"Ten_percent")
+addWorksheet(wb,"Continuous")
 
 writeData(wb,sheet="Primary",fit_pr,startRow=1)
 writeData(wb,sheet="Categorical",fit_cat,startRow=1)
 writeData(wb,sheet="Severe",fit_sev,startRow=1)
 writeData(wb,sheet="Five_percent",fit_five,startRow=1)
 writeData(wb,sheet="Ten_percent",fit_ten,startRow=1)
+writeData(wb,sheet="Continuous",fit_cont,startRow=1)
 
 saveWorkbook(wb, file = paste0(workdir,"Results/model-fit.xlsx"), overwrite = TRUE)
